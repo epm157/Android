@@ -65,7 +65,7 @@ public class Authentication {
 	 */
 	public void prepareAccessToken() {
 		//TODO: this line should be removed
-		this.getAppPreferences().edit().clear().commit();
+		//this.getAppPreferences().edit().clear().commit();
 		
 		if(getAccessToken()!=null) return;
 		//TODO: should see if it needs to be refreshed
@@ -162,9 +162,10 @@ public class Authentication {
 				}
 				else
 				{
+					
 					//Toast.makeText(context,"failed", Toast.LENGTH_LONG).show();
-					Intent i = new Intent(context.getBaseContext(),LoginActivity.class);
-	                context.startActivity(i);
+					//Intent i = new Intent(context.getBaseContext(),LoginActivity.class);
+	                //context.startActivity(i);
 				}
 				
 				}catch (JSONException e) {

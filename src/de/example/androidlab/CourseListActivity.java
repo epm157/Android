@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.ksoap2.serialization.SoapObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -42,11 +44,19 @@ public class CourseListActivity extends Activity {
         listView = (ListView) findViewById(R.id.listView);
         
         ////////////////
-        LearnRoom lr1=new LearnRoom("Course1","www","www","www");
-        LearnRoom lr2=new LearnRoom("Course2","www","www","www");
+        
+        Authentication authentication;
+		authentication = new Authentication(this);
+		L2P_Services tempService=new L2P_Services(this,authentication);
+		SoapObject obj=tempService.getCourseList();
+		
+		
+		
+        //LearnRoom lr1=new LearnRoom("Course1","www","www","www");
+        //LearnRoom lr2=new LearnRoom("Course2","www","www","www");
         l2pRoomslist=new ArrayList<LearnRoom>();
-        l2pRoomslist.add(lr1);
-        l2pRoomslist.add(lr2);
+        //l2pRoomslist.add(lr1);
+        //l2pRoomslist.add(lr2);
         adapter = new RoomArrayAdapter(CourseListActivity.this, R.layout.room_list_item, l2pRoomslist);
         listView.setAdapter(adapter);
         
@@ -116,7 +126,7 @@ public class CourseListActivity extends Activity {
 				//Log.d(tag, "Successfully completed XML Row Inflation!");
 			}
 			TextView tw1 = (TextView)row.findViewById(R.id.courseItemTextView);
-			String str = ((LearnRoom)objects.get(position)).getName();
+			String str = ((LearnRoom)objects.get(position)).getTitle();
 			tw1.setText(str);
 			return row;
 		}

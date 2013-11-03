@@ -91,7 +91,7 @@ public class DBRoulette extends Activity implements API_Listener {
 
 	private boolean mLoggedIn;
 	// Android widgets
-
+	public  final Activity mcontext = this;
 	Button l2p2dropbox;
 	Button dropbox2l2p;
 	Button l2p2device;
@@ -180,7 +180,19 @@ public class DBRoulette extends Activity implements API_Listener {
 				startActivity(i);
 			}
 		});
-
+		l2p2device=(Button) findViewById(R.id.l2p2device);
+		l2p2device.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// This logs you out if you're logged in, or vice versa
+				Intent i = new Intent(getBaseContext(),
+						CourseListActivity.class);
+				startActivity(i);
+				
+				
+				
+			}
+		});
+		
 		device2l2p = (Button) findViewById(R.id.device2l2p);
 		device2l2p.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {

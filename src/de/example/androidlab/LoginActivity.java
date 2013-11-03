@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class LoginActivity extends Activity {
 	Authentication authentication;
@@ -26,9 +27,24 @@ public class LoginActivity extends Activity {
             	
             	authentication = new Authentication(mcontext);
             	authentication.prepareAccessToken();
-            	/*Intent i = new Intent(getBaseContext(),DBRoulette.class);
-                startActivity(i);
-                finish();*/
+            	//Toast.makeText(getApplicationContext(), "token_code: "+"Again here!", Toast.LENGTH_LONG).show();
+            	
+            	
+            	String token=authentication.getAccessToken();
+            	//Toast.makeText(getApplicationContext(), "token_code: "+token, Toast.LENGTH_LONG).show();
+            	
+  
+			/*	L2P_Services tempService=new L2P_Services(mcontext,authentication);
+				tempService.getCourseList();
+            	*/
+            	
+            	if(token != null && token.length() >10)
+            	{
+            		Intent i = new Intent(getBaseContext(),DBRoulette.class);
+                    startActivity(i);
+                    finish();
+            	}
+            	
             }
         });
 	}

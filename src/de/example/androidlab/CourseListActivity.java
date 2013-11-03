@@ -46,7 +46,7 @@ public class CourseListActivity extends Activity {
         setContentView(R.layout.activity_courselist);
         listView = (ListView) findViewById(R.id.listView);
       
-        
+        l2pRoomslist=new ArrayList<LearnRoom>();
         
         Bundle b=this.getIntent().getExtras();
         
@@ -61,8 +61,6 @@ public class CourseListActivity extends Activity {
         		
         		//Toast.makeText(this,lm.getTitle(), Toast.LENGTH_LONG).show();
         	}
-        	adapter = new RoomArrayAdapter(CourseListActivity.this, R.layout.room_list_item, l2pRoomslist);
-            listView.setAdapter(adapter);
         }
         else
         {
@@ -80,7 +78,7 @@ public class CourseListActivity extends Activity {
 		
         //LearnRoom lr1=new LearnRoom("Course1","www","www","www");
         //LearnRoom lr2=new LearnRoom("Course2","www","www","www");
-        l2pRoomslist=new ArrayList<LearnRoom>();
+        
         //l2pRoomslist.add(lr1);
         //l2pRoomslist.add(lr2);
         adapter = new RoomArrayAdapter(CourseListActivity.this, R.layout.room_list_item, l2pRoomslist);
@@ -98,29 +96,6 @@ public class CourseListActivity extends Activity {
           }
         });
     }
-    /*
-    private class DownloadParseTask extends AsyncTask<Object, Object, Object>
-    {
-		@Override
-		protected void onPreExecute(){
-
-		}
-		
-		
-		@Override
-		protected Object doInBackground(Object... params)
-		{
-			
-		}
-		
-		@Override
-		protected void onPostExecute(Object result)
-		{
-		}
-    	
-    }
-	*/
-	
     
     private class RoomArrayAdapter extends ArrayAdapter<LearnRoom> 
     {

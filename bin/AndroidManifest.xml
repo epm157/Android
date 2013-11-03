@@ -58,6 +58,10 @@
             android:label="@string/title_activity_material_list" >
         </activity>
         <activity
+            android:name="de.example.androidlab.CourseListActivity"
+            android:label="@string/title_activity_material_list" >
+        </activity>
+        <activity
             android:name="de.example.androidlab.ChooserActivity"
             android:label="@string/title_activity_chooser" >
         </activity>

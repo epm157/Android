@@ -176,7 +176,7 @@ public class DBRoulette extends Activity implements API_Listener {
 			public void onClick(View v) {
 				// This logs you out if you're logged in, or vice versa
 				Intent i = new Intent(getBaseContext(),
-						MaterialListActivity.class);
+						CourseListActivity.class);
 				startActivity(i);
 			}
 		});

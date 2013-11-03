@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/login_back">
+	<Button 
+      android:id="@+id/l2p2dropbox" 
+	  android:text="L2P to Dropbox" 
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:enabled="false"
+      android:textColor="#ffffff"
+	  />
+
+	<Button
+	    android:id="@+id/dropbox2ltp"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:text="Dropbox to L2P"
+	    android:enabled="false"
+	    android:textColor="#ffffff" />
+	
+	<Button
+	    android:id="@+id/l2p2device"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:enabled="true"
+	    android:text="L2P to Device"
+	    android:textColor="#ffffff" />
+	
+	<Button
+	    android:id="@+id/device2l2p"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:enabled="true"
+	    android:text="Device to L2P"
+	    android:textColor="#ffffff" />
+	
+	<Button
+	    android:id="@+id/link"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:enabled="true"
+	    android:text="Link with Dropbox"
+	    android:textColor="#ffffff" />
+	
+	<Button
+	    android:id="@+id/pref"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:enabled="true"
+	    android:text="Preferences"
+	    android:textColor="#ffffff" />
+
+</LinearLayout>
+	      

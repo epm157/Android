@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by Alex on 6/23/13.
@@ -33,6 +35,7 @@ public class CourseListActivity extends Activity {
 	
 	private ListView listView;
 
+	private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
 	List<LearnRoom> l2pRoomslist;
 	
@@ -42,14 +45,37 @@ public class CourseListActivity extends Activity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_courselist);
         listView = (ListView) findViewById(R.id.listView);
+      
+        
+        
+        Bundle b=this.getIntent().getExtras();
+        
+        if(b != null)
+        {
+        	//Toast.makeText(this,"here", Toast.LENGTH_LONG).show();
+        	ArrayList<Parcelable> rooms=b.getParcelableArrayList("rooms");
+        	for(int i=0;i<rooms.size();i++)
+        	{
+        		LearnRoom lm=(LearnRoom)rooms.get(i);
+        		l2pRoomslist.add(lm);
+        		
+        		//Toast.makeText(this,lm.getTitle(), Toast.LENGTH_LONG).show();
+        	}
+        	adapter = new RoomArrayAdapter(CourseListActivity.this, R.layout.room_list_item, l2pRoomslist);
+            listView.setAdapter(adapter);
+        }
+        else
+        {
+        	Toast.makeText(this,"NO!", Toast.LENGTH_LONG).show();
+        }
         
         ////////////////
-        
+        /*
         Authentication authentication;
 		authentication = new Authentication(this);
 		L2P_Services tempService=new L2P_Services(this,authentication);
 		SoapObject obj=tempService.getCourseList();
-		
+		*/
 		
 		
         //LearnRoom lr1=new LearnRoom("Course1","www","www","www");

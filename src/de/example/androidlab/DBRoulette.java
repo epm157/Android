@@ -35,6 +35,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import org.ksoap2.serialization.SoapObject;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -62,6 +65,7 @@ import com.dropbox.client2.session.TokenPair;
 public class DBRoulette extends Activity implements API_Listener {
 	private static final String TAG = "DBRoulette";
 
+	final Activity act=this;
 	// /////////////////////////////////////////////////////////////////////////
 	// Your app-specific settings. //
 	// /////////////////////////////////////////////////////////////////////////
@@ -184,9 +188,14 @@ public class DBRoulette extends Activity implements API_Listener {
 		l2p2device.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// This logs you out if you're logged in, or vice versa
-				Intent i = new Intent(getBaseContext(),
+				/*Intent i = new Intent(getBaseContext(),
 						CourseListActivity.class);
-				startActivity(i);
+				startActivity(i);*/
+				
+				Authentication authentication;
+				authentication = new Authentication(act);
+				L2P_Services tempService=new L2P_Services(act,authentication);
+				tempService.getCourseList();
 				
 				
 				

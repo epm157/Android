@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TableRow
+        android:id="@+id/tableRow1"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/room_bg_selector" >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:gravity="fill" >
+
+            <TextView
+                android:id="@+id/courseItemTextView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignWithParentIfMissing="false"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@+id/imageFolder"
+                android:ellipsize="end"
+                android:gravity="center|left"
+                android:lines="2"
+                android:text="Room name"
+                android:textColor="#292929"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageFolder"
+                android:layout_width="32sp"
+                android:layout_height="32dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/folder" />
+
+        </RelativeLayout>
+
+    </TableRow>
+    	
+</LinearLayout>

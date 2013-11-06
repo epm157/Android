@@ -8,7 +8,7 @@
         android:id="@+id/afterAuthorize"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Click after authorization" />
+        android:text="Get Access Token" />
 
     <EditText
         android:id="@+id/editText1"

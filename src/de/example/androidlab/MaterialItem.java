@@ -1,26 +1,44 @@
 package de.example.androidlab;
 
-public class MaterialItem 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.format.DateFormat;
+
+public class MaterialItem implements Parcelable
 {
-	private int id;
+	private String id;
 	private String name;
-	private String link;
-	private boolean state; 
+	private String url;
+	private String fileType;
+	private String lastUpdated;  
+	private String state; 
 	MaterialItem(){
 		
 	}
 	
-	MaterialItem(int i,String name, String link, boolean state){
+	MaterialItem(String i,String name, String link,String ft,String lu, String state){
 		this.id=i;
 		this.name = name;
-		this.link = link;
+		this.url = link;
+		this.fileType=ft;
+		this.lastUpdated=lu;
 		this.setState(state);
 	}
-	public void setId(int i)
+	
+	MaterialItem(String i,String name, String link,String ft, String state){
+		this.id=i;
+		this.name = name;
+		this.url = link;
+		this.fileType=ft;
+		//this.lastUpdated=lu;
+		this.setState(state);
+	}
+	
+	public void setId(String i)
 	{
 		this.id=i;
 	}
-	public int getId()
+	public String getId()
 	{
 		return this.id;
 	}
@@ -28,23 +46,81 @@ public class MaterialItem
 		this.name = name;
 	}
 	
-	public void setlink(String link){
-		this.link = link;
-	}
-	
-	
 	public String getName(){
 		return this.name;
 	}
-	public String getlink(){
-		return this.link;
+	
+	public void setUrl(String link){
+		this.url = link;
+	}
+	
+	public void setFileType(String ft)
+	{
+		this.fileType=ft;
+	}
+	public String getFileType()
+	{
+		return this.fileType;
+	}
+	
+	public void setLastUpdated(String lu)
+	{
+		this.lastUpdated=lu;
+	}
+	public String getLastUpdated()
+	{
+		return this.lastUpdated;
+	}
+	
+	public String getUrl(){
+		return this.url;
 	}
 
-	public boolean isState() {
+	public String isState() {
 		return state;
 	}
 
-	public void setState(boolean state) {
+	public void setState(String state) {
 		this.state = state;
 	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		// TODO Auto-generated method stub
+		dest.writeStringArray(new String[] { this.id, this.name,  this.url, this.fileType, this.lastUpdated, this.state });
+		
+	}
+	
+	public MaterialItem(Parcel in)
+	{
+		String[] data=new String[6];
+		in.readStringArray(data);
+		id=data[0];
+		name=data[1];
+		url=data[2];
+		fileType=data[3];
+		lastUpdated=data[4];
+		state=data[5];
+	}
+	
+	public static final Parcelable.Creator<MaterialItem> CREATOR = new Parcelable.Creator<MaterialItem>() {
+
+		@Override
+		public MaterialItem createFromParcel(Parcel source) {
+			// TODO Auto-generated method stub
+			return new MaterialItem(source);
+		}
+
+		@Override
+		public MaterialItem[] newArray(int size) {
+			// TODO Auto-generated method stub
+			return new MaterialItem[size];
+		}
+	};
 }

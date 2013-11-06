@@ -30,19 +30,19 @@ import android.widget.Toast;
 /**
  * Created by Alex on 6/23/13.
  */
-public class CourseListActivity extends Activity {
+public class CourseListActivity extends CommonActivity {
 	//Define some Constants we use for Dialog-creation.
-	
+	final CommonActivity act=this;
 	private ListView listView;
 
-	private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
+	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
 	List<LearnRoom> l2pRoomslist;
 	
     public void onCreate(Bundle savedInstanceState) 
     {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_courselist);
         listView = (ListView) findViewById(R.id.listView);
       
@@ -81,7 +81,7 @@ public class CourseListActivity extends Activity {
         
         //l2pRoomslist.add(lr1);
         //l2pRoomslist.add(lr2);
-        adapter = new RoomArrayAdapter(CourseListActivity.this, R.layout.room_list_item, l2pRoomslist);
+        adapter = new RoomArrayAdapter(this, R.layout.room_list_item, l2pRoomslist);
         listView.setAdapter(adapter);
         
         
@@ -91,6 +91,18 @@ public class CourseListActivity extends Activity {
         public void onItemClick(AdapterView<?> parent, final View view,
               int position, long id) {
             final LearnRoom item = (LearnRoom) parent.getItemAtPosition(position);
+            String i = item.getId();
+            //show(i);
+            
+            
+            
+           /*
+            L2P_Services ser = new L2P_Services(CourseListActivity.this, new Authentication(CourseListActivity.this));
+            ser.getDocumentsOverview(i);
+            */
+            
+			L2P_Services tempService=new L2P_Services(act,getAuthentication());
+			tempService.getDocumentsOverview(i);
             
             
           }

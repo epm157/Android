@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.SparseBooleanArray;
@@ -30,7 +31,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MaterialListActivity extends Activity  {
+public class MaterialListActivity extends CommonActivity  {
+	
+	private ListView listView;
+	final CommonActivity act=this;
+	MaterialArrayAdapter adapter;
+	List<MaterialItem> materialsList;
+	
 	private List<MaterialItem> videos;
 	private List<MaterialItem> documents;
 	private List<MaterialItem> workingMaterials;
@@ -46,20 +53,41 @@ public class MaterialListActivity extends Activity  {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_material_lists);
 
+		materialsList=new ArrayList<MaterialItem>();
+		
+		 Bundle b=this.getIntent().getExtras();
+	        
+	        if(b != null)
+	        {
+	        	Toast.makeText(this,"here", Toast.LENGTH_LONG).show();
+	        	ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
+	        	for(int i=0;i<Materials.size();i++)
+	        	{
+	        		MaterialItem lm=(MaterialItem)Materials.get(i);
+	        		//Materials.add(lm);
+	        		materialsList.add(lm);
+	        		//Toast.makeText(this,lm.getName(), Toast.LENGTH_LONG).show();
+	        	}
+	        }
+	        else
+	        {
+	        	Toast.makeText(this,"NO!", Toast.LENGTH_LONG).show();
+	        }
+		
 		checkedItems=new ArrayList<String>();
 		materialList = (ListView) findViewById(R.id.materialListView);
-		final List<MaterialItem> materials = new Vector<MaterialItem>();
-		String path = "/sdcard/l2p/";
-		String files;
-		File folder = new File(path);
-		File[] listOfFiles = folder.listFiles();
-		for (int i = 0; i < listOfFiles.length; i++) {
-
-			if (listOfFiles[i].isFile()) {
-				String name = listOfFiles[i].getName();
-				materials.add(new MaterialItem(1,name, "www", false));
-			}
-		}
+		
+		
+		
+		MaterialArrayAdapter adapter = new MaterialArrayAdapter(
+				getBaseContext(), R.layout.material_list_item,
+				materialsList);
+		materialList.setAdapter(adapter);
+		//final List<MaterialItem> materials = new Vector<MaterialItem>();
+		
+		
+		
+		/*
 		spinner1 = (Spinner) findViewById(R.id.spinner1);
 		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
@@ -75,6 +103,8 @@ public class MaterialListActivity extends Activity  {
 				Search(".", 0, materials);
 			}
 		});
+		
+		
 		Button sync = (Button) findViewById(R.id.syncButton);
 		sync.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -132,7 +162,9 @@ public class MaterialListActivity extends Activity  {
 			}
 		});
 	}
-
+	*/
+	}
+	
 	private class MaterialArrayAdapter extends ArrayAdapter<MaterialItem> {
 		private static final String tag = "MaterialArrayAdapter";
 		private Context context;
@@ -163,12 +195,12 @@ public class MaterialListActivity extends Activity  {
 			final MaterialItem materialitem = getItem(position);
 			if (materialitem != null) {
 				// Get reference to Buttons
-				TextView l2pnameText = (TextView) row
-						.findViewById(R.id.materialItemTextView);
+				TextView l2pnameText = (TextView) row.findViewById(R.id.materialItemTextView);
 				// Set Text and Tags
-				CheckBox cb = (CheckBox) row
-						.findViewById(R.id.materialCheckBox);
-				cb.setChecked(materialitem.isState());
+				CheckBox cb = (CheckBox) row.findViewById(R.id.materialCheckBox);
+				//cb.setChecked(materialitem.isState());
+				cb.setChecked(false);
+				/*
 				cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView,
@@ -182,6 +214,7 @@ public class MaterialListActivity extends Activity  {
 						//Toast.makeText(getApplicationContext(),String.valueOf(materialitem.getName()),Toast.LENGTH_SHORT).show();
 					}
 				});
+				*/
 				// We need the Tag in order to identify the button later.
 				if (l2pnameText != null) {
 					l2pnameText.setText(materialitem.getName());
@@ -191,6 +224,8 @@ public class MaterialListActivity extends Activity  {
 		}
 	}
 
+	
+	/*
 	public void Search(String str, int type, List<MaterialItem> materials) {
 		checkedItems.clear();
 		final List<MaterialItem> mats = new Vector<MaterialItem>(0);
@@ -236,4 +271,5 @@ public class MaterialListActivity extends Activity  {
 		}
 		Toast.makeText(getApplicationContext(),String.valueOf(0),Toast.LENGTH_SHORT).show();
 	}
+	*/
 }

@@ -31,29 +31,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-
-import org.ksoap2.serialization.SoapObject;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.android.AuthActivity;
@@ -62,10 +54,10 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.TokenPair;
 
-public class DBRoulette extends Activity implements API_Listener {
+public class DBRoulette extends CommonActivity implements API_Listener {
 	private static final String TAG = "DBRoulette";
 
-	final Activity act=this;
+	final CommonActivity act=this;
 	// /////////////////////////////////////////////////////////////////////////
 	// Your app-specific settings. //
 	// /////////////////////////////////////////////////////////////////////////
@@ -187,18 +179,9 @@ public class DBRoulette extends Activity implements API_Listener {
 		l2p2device=(Button) findViewById(R.id.l2p2device);
 		l2p2device.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// This logs you out if you're logged in, or vice versa
-				/*Intent i = new Intent(getBaseContext(),
-						CourseListActivity.class);
-				startActivity(i);*/
 				
-				Authentication authentication;
-				authentication = new Authentication(act);
-				L2P_Services tempService=new L2P_Services(act,authentication);
+				L2P_Services tempService=new L2P_Services(act,getAuthentication());
 				tempService.getCourseList();
-				
-				
-				
 			}
 		});
 		

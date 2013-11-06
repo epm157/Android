@@ -188,6 +188,7 @@ public final class R {
         public static final int table_list_title=0x7f020023;
     }
     public static final class id {
+        public static final int action_developer_menu=0x7f0b0036;
         public static final int action_settings=0x7f0b0035;
         public static final int afterAuthorize=0x7f0b0027;
         public static final int backToMainPage=0x7f0b0019;

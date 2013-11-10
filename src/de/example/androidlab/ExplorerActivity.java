@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -94,7 +93,7 @@ new ArrayAdapter<String>(this, R.layout.explorer_row, item);
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		// TODO Auto-generated method stub
+		// TOD Auto-generated method stub
 		//uploadButton.setEnabled(false);
 		
 		File file = new File(path.get(position));

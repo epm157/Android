@@ -2,25 +2,17 @@ package de.example.androidlab;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.ksoap2.serialization.SoapObject;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -32,7 +24,6 @@ import android.widget.Toast;
  */
 public class CourseListActivity extends CommonActivity {
 	//Define some Constants we use for Dialog-creation.
-	final CommonActivity act=this;
 	private ListView listView;
 
 	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
@@ -67,20 +58,7 @@ public class CourseListActivity extends CommonActivity {
         	Toast.makeText(this,"NO!", Toast.LENGTH_LONG).show();
         }
         
-        ////////////////
-        /*
-        Authentication authentication;
-		authentication = new Authentication(this);
-		L2P_Services tempService=new L2P_Services(this,authentication);
-		SoapObject obj=tempService.getCourseList();
-		*/
-		
-		
-        //LearnRoom lr1=new LearnRoom("Course1","www","www","www");
-        //LearnRoom lr2=new LearnRoom("Course2","www","www","www");
-        
-        //l2pRoomslist.add(lr1);
-        //l2pRoomslist.add(lr2);
+	
         adapter = new RoomArrayAdapter(this, R.layout.room_list_item, l2pRoomslist);
         listView.setAdapter(adapter);
         
@@ -89,22 +67,63 @@ public class CourseListActivity extends CommonActivity {
 
         @Override
         public void onItemClick(AdapterView<?> parent, final View view,
-              int position, long id) {
-            final LearnRoom item = (LearnRoom) parent.getItemAtPosition(position);
-            String i = item.getId();
-            //show(i);
+              final int position, long id) {
+        	final AdapterView<?> fp = parent;
+            AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>() {
+            	@Override
+            	protected void onPreExecute() {
+            		// TODO Auto-generated method stub
+            		super.onPreExecute();
+            	}
+            	
+            	
+            	@Override
+            	protected SoapObject doInBackground(Void... params) {
+            		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
+                    String iii = item.getId();
+                    L2P_Services tempService=new L2P_Services(getAppPreferences());
+                    SoapObject obj=null;
+        			try {
+        				obj = tempService.getDocumentsOverview(iii);
+        			} catch (CommonException e) {
+        				// TODO handle error here
+        				e.printStackTrace();
+        			}
+        			
+        			return obj;
+                    
+            	}
+            	
+            	@Override
+            	protected void onPostExecute(SoapObject result) {
+            		super.onPostExecute(result);
+            		ArrayList<MaterialItem> materials=new ArrayList<MaterialItem>();
+                    materials.clear();
+                    
+                    int count=result.getPropertyCount();
+                    for(int i=0;i<count;i++)
+                    {
+                            SoapObject first =(SoapObject)result.getProperty(i);
+                            String idd=first.getPropertyAsString("Id");
+                            String name=first.getPropertyAsString("Name");
+                            String url=first.getPropertyAsString("Url");
+                            String ft=first.getPropertyAsString("FileType");
+                            String lu=first.getPropertyAsString("LastUpdated").toString();
+                            String state="0";
+                            MaterialItem lr=new MaterialItem(idd, name, url, ft, lu, state);        
+                            materials.add(lr);
+                    }
+                    
+                    Bundle b = new Bundle();
+                    b.putParcelableArrayList("materials", materials);
+                    Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
+                    intnt.putExtras(b);
+                    CourseListActivity.this.startActivity(intnt);
+            	}
+            	
+            };
             
-            
-            
-           /*
-            L2P_Services ser = new L2P_Services(CourseListActivity.this, new Authentication(CourseListActivity.this));
-            ser.getDocumentsOverview(i);
-            */
-            
-			L2P_Services tempService=new L2P_Services(act,getAuthentication());
-			tempService.getDocumentsOverview(i);
-            
-            
+            task.execute();
           }
         });
     }

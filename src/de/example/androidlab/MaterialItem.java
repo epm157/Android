@@ -2,7 +2,6 @@ package de.example.androidlab;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.format.DateFormat;
 
 public class MaterialItem implements Parcelable
 {
@@ -86,13 +85,13 @@ public class MaterialItem implements Parcelable
 
 	@Override
 	public int describeContents() {
-		// TODO Auto-generated method stub
+		// TOD Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		// TODO Auto-generated method stub
+		// TOD Auto-generated method stub
 		dest.writeStringArray(new String[] { this.id, this.name,  this.url, this.fileType, this.lastUpdated, this.state });
 		
 	}
@@ -113,13 +112,13 @@ public class MaterialItem implements Parcelable
 
 		@Override
 		public MaterialItem createFromParcel(Parcel source) {
-			// TODO Auto-generated method stub
+			// TOD Auto-generated method stub
 			return new MaterialItem(source);
 		}
 
 		@Override
 		public MaterialItem[] newArray(int size) {
-			// TODO Auto-generated method stub
+			// TOD Auto-generated method stub
 			return new MaterialItem[size];
 		}
 	};

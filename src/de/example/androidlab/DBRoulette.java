@@ -33,12 +33,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import org.ksoap2.serialization.SoapObject;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -57,7 +61,6 @@ import com.dropbox.client2.session.TokenPair;
 public class DBRoulette extends CommonActivity implements API_Listener {
 	private static final String TAG = "DBRoulette";
 
-	final CommonActivity act=this;
 	// /////////////////////////////////////////////////////////////////////////
 	// Your app-specific settings. //
 	// /////////////////////////////////////////////////////////////////////////
@@ -180,8 +183,60 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		l2p2device.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				
-				L2P_Services tempService=new L2P_Services(act,getAuthentication());
-				tempService.getCourseList();
+				AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
+					ProgressDialog pd;
+					@Override
+					protected void onPreExecute() {
+						super.onPreExecute();
+						pd = ProgressDialog.show(DBRoulette.this, "Please Wait", "Getting List Of Courses");
+					}
+					
+					@Override
+					protected SoapObject doInBackground(Void... params) {
+						L2P_Services tempService=new L2P_Services(getAppPreferences());
+						SoapObject obj=null;
+							try {
+								obj = tempService.getCourseList();
+							} catch (CommonException e) {
+								// TODO handle error, top level
+								e.printStackTrace();
+							}
+						return obj;
+					}
+					
+					
+					@Override
+					protected void onPostExecute(SoapObject result) {
+						super.onPostExecute(result);
+						pd.dismiss();
+						ArrayList<LearnRoom> rooms=new ArrayList<LearnRoom>();
+						
+						int count=result.getPropertyCount();
+						for(int i=0;i<count;i++)
+						{
+							SoapObject first =(SoapObject)result.getProperty(i);
+							String t=first.getPropertyAsString("Title");
+							String id=first.getPropertyAsString("ID");
+							LearnRoom lr=new LearnRoom(t,id);	
+							rooms.add(lr);
+						}
+						
+						Bundle b = new Bundle();
+						b.putParcelableArrayList("rooms", rooms);
+						Intent i = new Intent(DBRoulette.this,CourseListActivity.class);
+						i.putExtras(b);
+						DBRoulette.this.startActivity(i);
+					}
+				};
+				task.execute();
+				
+				
+				
+				
+               
+        		
+				
+                
 			}
 		});
 		
@@ -427,7 +482,7 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 
 	@Override
 	public void onFail(String errormessage) {
-		// TODO Auto-generated method stub
+		// TOD Auto-generated method stub
 
 	}
 

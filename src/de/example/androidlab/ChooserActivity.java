@@ -9,23 +9,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import com.dropbox.chooser.android.DbxChooser;
-import android.net.Uri;
-import android.os.Bundle;
+
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
-import android.text.method.LinkMovementMethod;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.dropbox.chooser.android.DbxChooser;
 
 public class ChooserActivity extends ListActivity {
 	 static final String APP_KEY = "yddybp75i7468u9"/* This is for you to fill in! */;
@@ -72,7 +69,7 @@ public class ChooserActivity extends ListActivity {
                 	
 					copyFiles(source, destination);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// TOD Auto-generated catch block
 					e.printStackTrace();
 				}
                 //Toast.makeText(getApplicationContext(),String.valueOf(result.getLink()), Toast.LENGTH_SHORT).show();

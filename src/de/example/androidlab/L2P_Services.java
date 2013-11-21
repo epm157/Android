@@ -50,46 +50,6 @@ public class L2P_Services {
 		.addProperty("userToken", token)
 		.addProperty("courseId", courseId);
 		return request.callService(urlToConnect, soapAction);
-
-		/*
-		serviceCall.setObserver(new Observer() {
-			SoapObject obj=null;
-			@Override
-			public void update(Observable observable, Object data) {
-				
-				//Toast.makeText(activity, String.valueOf("Test:" +data.toString().length()), Toast.LENGTH_LONG).show();
-				
-				obj=(SoapObject)data;
-				ArrayList<MaterialItem> materials=new ArrayList<MaterialItem>();
-				materials.clear();
-				
-				int count=obj.getPropertyCount();
-				Toast.makeText(activity, "number: "+ count, Toast.LENGTH_LONG).show();
-				for(int i=0;i<count;i++)
-				{
-					SoapObject first =(SoapObject)obj.getProperty(i);
-					String id=first.getPropertyAsString("Id");
-					String name=first.getPropertyAsString("Name");
-					String url=first.getPropertyAsString("Url");
-					String ft=first.getPropertyAsString("FileType");
-					String lu=first.getPropertyAsString("LastUpdated").toString();
-					String state="0";
-					MaterialItem lr=new MaterialItem(id, name, url, ft, lu, state);	
-					materials.add(lr);
-					//Toast.makeText(activity,"Material: "+ name, Toast.LENGTH_LONG).show();
-				}
-				
-				Bundle b = new Bundle();
-				b.putParcelableArrayList("materials", materials);
-				Intent i = new Intent(activity,MaterialListActivity.class);
-				i.putExtras(b);
-				activity.startActivity(i);
-				
-			}
-		});
-		*/
-		
-
 	}
 	
 	

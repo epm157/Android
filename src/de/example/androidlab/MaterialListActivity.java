@@ -2,16 +2,22 @@ package de.example.androidlab;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -24,7 +30,6 @@ public class MaterialListActivity extends CommonActivity  {
 	final CommonActivity act=this;
 	MaterialArrayAdapter adapter;
 	List<MaterialItem> materialsList;
-	
 	private List<MaterialItem> videos;
 	private List<MaterialItem> documents;
 	private List<MaterialItem> workingMaterials;
@@ -34,6 +39,7 @@ public class MaterialListActivity extends CommonActivity  {
 	private ListView materialList;
 	private Spinner spinner1;
 	List<String> checkedItems;
+	private int spinnerValue;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -41,12 +47,13 @@ public class MaterialListActivity extends CommonActivity  {
 		setContentView(R.layout.activity_material_lists);
 
 		materialsList=new ArrayList<MaterialItem>();
+		spinnerValue=0;
 		
 		 Bundle b=this.getIntent().getExtras();
 	        
 	        if(b != null)
 	        {
-	        	Toast.makeText(this,"here", Toast.LENGTH_LONG).show();
+	        	
 	        	ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
 	        	for(int i=0;i<Materials.size();i++)
 	        	{
@@ -64,47 +71,33 @@ public class MaterialListActivity extends CommonActivity  {
 		checkedItems=new ArrayList<String>();
 		materialList = (ListView) findViewById(R.id.materialListView);
 		
-		
+		workingMaterials=materialsList;
 		
 		MaterialArrayAdapter adapter = new MaterialArrayAdapter(
 				getBaseContext(), R.layout.material_list_item,
 				materialsList);
 		materialList.setAdapter(adapter);
-		//final List<MaterialItem> materials = new Vector<MaterialItem>();
+		//final List<MaterialItem> materials = new Vector<MaterialItem>();		
 		
-		
-		
-		/*
 		spinner1 = (Spinner) findViewById(R.id.spinner1);
 		spinner1.setOnItemSelectedListener(new OnItemSelectedListener() {
+
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
-				checkedItems.clear();
-				Search(".", arg2, materials);
+
+				spinnerValue=arg2;
+				Search("null", arg2, materialsList);
 			}
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
+
 				checkedItems.clear();
-				Search(".", 0, materials);
+				//Search(".", 0, materials);
 			}
 		});
 		
-		
-		Button sync = (Button) findViewById(R.id.syncButton);
-		sync.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				String array[] =new String[checkedItems.size()];
-				checkedItems.toArray(array);
-				Intent i = new Intent(getBaseContext(),DBRoulette.class);
-				i.putExtra("addresses", array);
-				i.putExtra("flag", 1);
-				startActivity(i);
-				finish();
-			}
-		});
 		
 		mtxt = (EditText) findViewById(R.id.edSearch);
 		mtxt.addTextChangedListener(new TextWatcher() {
@@ -124,17 +117,34 @@ public class MaterialListActivity extends CommonActivity  {
 				String searchStr = String.valueOf(mtxt.getText());
 				if (searchStr.length() > 0 && !searchStr.equals(" ")
 						&& !searchStr.equals("  ") && !searchStr.equals(" ")) {
-					Search(searchStr, 0, materials);
-				} else if (searchStr.length() == 0 || searchStr.equals(" ")
+					
+					Search(searchStr, spinnerValue, materialsList);
+				} 
+				else if (searchStr.length() == 0 || searchStr.equals(" ")
 						|| searchStr.equals("  ") || searchStr.equals(" ")) {
-					checkedItems.clear();
-					MaterialArrayAdapter adapter = new MaterialArrayAdapter(
-							getBaseContext(), R.layout.material_list_item,
-							materials);
-					materialList.setAdapter(adapter);
+					
+					Search("null", spinnerValue, materialsList);
+
 				}
 			}
 		});
+		
+		/*
+		Button sync = (Button) findViewById(R.id.syncButton);
+		sync.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				String array[] =new String[checkedItems.size()];
+				checkedItems.toArray(array);
+				Intent i = new Intent(getBaseContext(),DBRoulette.class);
+				i.putExtra("addresses", array);
+				i.putExtra("flag", 1);
+				startActivity(i);
+				finish();
+			}
+		});
+		
+		
 		
 		cancelButton = (Button) findViewById(R.id.btnSearch);
 		cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -185,9 +195,39 @@ public class MaterialListActivity extends CommonActivity  {
 				TextView l2pnameText = (TextView) row.findViewById(R.id.materialItemTextView);
 				// Set Text and Tags
 				CheckBox cb = (CheckBox) row.findViewById(R.id.materialCheckBox);
-				//cb.setChecked(materialitem.isState());
-				cb.setChecked(false);
-				/*
+				final int state=Integer.parseInt(materialitem.isState());
+				boolean b=false;
+				if(state==1)
+					b=true;
+				cb.setChecked(b);
+				//cb.setChecked(false);
+				cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						// TODO Auto-generated method stub
+						Toast.makeText(getApplicationContext(),materialitem.getName(),Toast.LENGTH_SHORT).show();
+						int id=Integer.parseInt(materialitem.getId());
+						for(int i=0; i<materialsList.size(); i++)
+						{
+							MaterialItem mt=materialsList.get(i);
+							int tid=Integer.parseInt(mt.getId());
+							if(tid==id)
+							{
+								if(state==1)
+									mt.setState("0");
+								else
+									mt.setState("1");
+								
+							}
+								
+						}
+					}
+				});
+				
+						
+						/*
+						
 				cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView,
@@ -212,51 +252,71 @@ public class MaterialListActivity extends CommonActivity  {
 	}
 
 	
-	/*
-	public void Search(String str, int type, List<MaterialItem> materials) {
-		checkedItems.clear();
-		final List<MaterialItem> mats = new Vector<MaterialItem>(0);
-			for (MaterialItem temp : materials){
-			if ((temp.getName().toLowerCase()).contains(str.toLowerCase())) {
-				if (type == 0) {
-					//Toast.makeText(getApplicationContext(),String.valueOf(temp.isState()),Toast.LENGTH_SHORT).show();
-					mats.add(new MaterialItem(1,temp.getName(), temp.getlink(),
-							false));
-				}
-				else if (type == 1) {
-					if (temp.getName().toString().toLowerCase().contains("mp4")
-							|| temp.getName().toLowerCase().contains("avi")
-							|| temp.getName().toLowerCase().contains("flv")
-							|| temp.getName().toLowerCase().contains("swf")) {
-						mats.add(new MaterialItem(1,temp.getName(), temp
-								.getlink(), temp.isState()));
-					}
-				} else if (type == 2) {
-					if (temp.getName().toString().toLowerCase().contains("pdf")
-							|| temp.getName().toLowerCase().contains("doc")
-							|| temp.getName().toLowerCase().contains("docx")
-							|| temp.getName().toLowerCase().contains("html")) {
-						mats.add(new MaterialItem(1,temp.getName(), temp
-								.getlink(), temp.isState()));
-					}
-				}
+	
+	public void Search(String str, int selectedType, List<MaterialItem> materials) {
+		
+		List<MaterialItem> mats=new ArrayList<MaterialItem>();
+		mats.clear();
+		for(int i=0; i<materials.size();i++)
+		{
+			MaterialItem temp=materials.get(i);
+			String materialType=temp.getFileType().toLowerCase();
+			String materialName=temp.getName().toLowerCase();
+			if(str.equals(null))
+				str="null";
+			str=str.toLowerCase();
+			if(selectedType==0)
+			{
+				if(str.equals("null"))
+					mats.add(temp);
+				else if(materialName.contains(str))
+					mats.add(temp);
 			}
+			if(selectedType==1)
+			{
+				if(materialType.equals("mp4") || materialType.equals("avi"))
+					{
+						if(str.equals("null"))
+							mats.add(temp);
+						else if(materialName.contains(str))
+							mats.add(temp);
+					}
+			}
+				
+			
+			if(selectedType==2)
+			{
+				//Toast.makeText(getApplicationContext(),str,Toast.LENGTH_LONG).show();
+				if(materialType.equals("pdf") || materialType.equals("doc"))
+				{
+					
+					if(str.equals("null"))
+						mats.add(temp);
+					else if(materialName.contains(str))
+					{
+						mats.add(temp);
+						
+					}
+						
+				}
+			}	
+			
 		}
+		
+		
+		workingMaterials=mats;
+		
+		//Toast.makeText(getApplicationContext(),String.valueOf(workingMaterials.size()),Toast.LENGTH_LONG).show();
+		Refresh(workingMaterials);
+		
+	}
+	public final void Refresh(List<MaterialItem> materials)
+	{
+		
 		MaterialArrayAdapter adapter = new MaterialArrayAdapter(
-				getBaseContext(), R.layout.material_list_item, mats);
+				getBaseContext(), R.layout.material_list_item,
+				materials);
 		materialList.setAdapter(adapter);
 	}
-	public final void Refresh()
-	{
-		int sum=0;
-		for (int i = 0; i < mats.size(); i++)
-		{
-			
-		    
-		
-		
-		}
-		Toast.makeText(getApplicationContext(),String.valueOf(0),Toast.LENGTH_SHORT).show();
-	}
-	*/
+	
 }

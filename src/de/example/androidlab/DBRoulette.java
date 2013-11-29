@@ -104,6 +104,8 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 	private String mCameraFileName;
 
 	File[] listFile;
+	private int index;
+	
 	ArrayList<String> f = new ArrayList<String>();
 	
 
@@ -120,10 +122,11 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		setContentView(R.layout.main);
 		checkAppKeySetup();
 
+		index=0;
 		Intent x = this.getIntent();
 		int flag = x.getIntExtra("flag", 0);
 		String[] addresses = x.getStringArrayExtra("addresses");
-		if (flag == 1) {
+		if (flag == 10) {
 			String path = "/sdcard/l2p/";
 
 			File folder = new File(path);
@@ -138,9 +141,25 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 			Upload upload = new Upload(Constants.UploadPhotos_Code,
 					DBRoulette.this, mApi, "", listFile);
 			upload.execute();
-			Toast.makeText(getApplicationContext(),
-					String.valueOf(addresses.length), Toast.LENGTH_SHORT)
-					.show();
+			//Toast.makeText(getApplicationContext(),String.valueOf(addresses.length), Toast.LENGTH_SHORT).show();
+		}
+		if(flag==2)
+		{
+			ArrayList<File> fileArray=new ArrayList<File>();
+			ArrayList<String> test = x.getStringArrayListExtra("test");
+			for(int i=0;i<test.size();i++)
+			{
+				File t = new File(test.get(i));
+				fileArray.add(t);
+				//listFile[index++]=t;
+				
+				Toast.makeText(getApplicationContext(),test.get(i), Toast.LENGTH_LONG).show();
+			}
+				
+			//listFile = (File[]) fileArray.toArray();
+			File[] fSorted = fileArray.toArray(new File[fileArray.size()]);
+			Upload upload = new Upload(Constants.UploadPhotos_Code,DBRoulette.this, mApi, "", fSorted);
+			upload.execute();
 		}
 
 		mSubmit = (Button) findViewById(R.id.link);
@@ -226,6 +245,7 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 						Intent i = new Intent(DBRoulette.this,CourseListActivity.class);
 						i.putExtras(b);
 						DBRoulette.this.startActivity(i);
+						//finish();
 					}
 				};
 				task.execute();
@@ -469,9 +489,9 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 
 					}
 
-					Intent i = new Intent(DBRoulette.this, DBRoulette.class);
-					startActivity(i);
-					finish();
+					//Intent i = new Intent(DBRoulette.this, DBRoulette.class);
+					//startActivity(i);
+					//finish();
 				}
 			}
 		} catch (Exception e) {

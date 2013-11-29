@@ -187,8 +187,8 @@ public class MaterialListActivity extends CommonActivity  {
 				       	
 				       	new DownloadFile().execute(fileAddresses.get(fileAddresses.size()-1).toString(),"temp");
 				       	
-				       	Bundle b = new Bundle();
-	                    b.putParcelableArrayList("materials", checkedItems);
+				       	//Bundle b = new Bundle();
+	                    //b.putParcelableArrayList("materials", checkedItems);
 				       	//Toast.makeText(getApplicationContext(),"Size: "+checkedItems.size(),Toast.LENGTH_SHORT).show();
 				       	
 	                    mProgressDialog = new ProgressDialog(MaterialListActivity.this);
@@ -201,8 +201,7 @@ public class MaterialListActivity extends CommonActivity  {
 	                    mProgressDialog.show();
 	                    
 	                    
-				       	Intent intnt = new Intent(MaterialListActivity.this,Upload.class);
-	                    intnt.putExtras(b);
+				       	
 	                    //MaterialListActivity.this.startActivity(intnt);
 				    	//finish();
 				    }
@@ -411,7 +410,7 @@ public class MaterialListActivity extends CommonActivity  {
 		    	}
 		        
 		        File file = new File(applicationDirectory + "/" +fileName.replace("%20", " "));
-		        String later="/sdcard/l2p_to_temp"+path+fileName.replace("%20", " ");
+		        String later="/sdcard/l2p_to_temp"+path+ "/" +fileName.replace("%20", " ");
 		        //newFiles.add(later);
 		        downloadedFiles.add(later);
 		        httpclient.getCredentialsProvider().setCredentials(
@@ -519,10 +518,20 @@ public class MaterialListActivity extends CommonActivity  {
 			if(fileAddresses.size()==0)
 			{
 				mProgressDialog.dismiss();
-				for(int i=0;i<downloadedFiles.size();i++)
-					Toast.makeText(getApplicationContext(),(String)downloadedFiles.get(i), Toast.LENGTH_LONG).show();
+				//for(int i=0;i<downloadedFiles.size();i++)
+					//Toast.makeText(getApplicationContext(),(String)downloadedFiles.get(i), Toast.LENGTH_LONG).show();
 				
-				finish();
+				if(downloadedFiles.size()>0)
+				{
+					
+					
+					Intent intnt = new Intent(MaterialListActivity.this,DBRoulette.class);
+                    intnt.putStringArrayListExtra("test", (ArrayList<String>) downloadedFiles);
+					intnt.putExtra("flag", 2);
+					startActivity(intnt);
+					finish();
+				}
+				
 				//for(int i=0;i<newFiles.size();i++)
 //					/Toast.makeText(getApplicationContext(),(String)newFiles.get(i), Toast.LENGTH_LONG).show();
 				//newFiles.clear();

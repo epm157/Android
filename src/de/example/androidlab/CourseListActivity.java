@@ -26,6 +26,7 @@ public class CourseListActivity extends CommonActivity {
 	//Define some Constants we use for Dialog-creation.
 	private ListView listView;
 
+	private String courseName;
 	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
 	List<LearnRoom> l2pRoomslist;
@@ -81,6 +82,7 @@ public class CourseListActivity extends CommonActivity {
             	protected SoapObject doInBackground(Void... params) {
             		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
                     String iii = item.getId();
+                    courseName=item.getTitle();
                     L2P_Services tempService=new L2P_Services(getAppPreferences());
                     SoapObject obj=null;
         			try {
@@ -118,6 +120,7 @@ public class CourseListActivity extends CommonActivity {
                     b.putParcelableArrayList("materials", materials);
                     Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
                     intnt.putExtras(b);
+                    intnt.putExtra("coursename", courseName);
                     CourseListActivity.this.startActivity(intnt);
             	}
             	

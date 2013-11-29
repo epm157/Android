@@ -17,6 +17,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -57,7 +58,10 @@ public class MaterialListActivity extends CommonActivity  {
 	private List<MaterialItem> mats;
 	private ListView materialList;
 	private Spinner spinner1;
-	private List fileAddresses;
+	private List<String> fileAddresses;
+	private List<String> downloadedFiles;
+	private ProgressDialog mProgressDialog;
+	private String courseName;
 	
 	private int spinnerValue;
 	@Override
@@ -67,6 +71,7 @@ public class MaterialListActivity extends CommonActivity  {
 		setContentView(R.layout.activity_material_lists);
 
 		fileAddresses=new ArrayList<String>();
+		downloadedFiles=new ArrayList<String>();
 		materialsList=new ArrayList<MaterialItem>();
 		spinnerValue=0;
 		checkedItems=new ArrayList<MaterialItem>();
@@ -75,6 +80,7 @@ public class MaterialListActivity extends CommonActivity  {
 	        
 	        if(b != null)
 	        {
+	        	courseName=b.getString("coursename", "null");
 	        	
 	        	ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
 	        	for(int i=0;i<Materials.size();i++)
@@ -185,7 +191,16 @@ public class MaterialListActivity extends CommonActivity  {
 	                    b.putParcelableArrayList("materials", checkedItems);
 				       	//Toast.makeText(getApplicationContext(),"Size: "+checkedItems.size(),Toast.LENGTH_SHORT).show();
 				       	
-				       	
+	                    mProgressDialog = new ProgressDialog(MaterialListActivity.this);
+	                    mProgressDialog.setMessage("Please wait until your file is downloaded");
+	                    mProgressDialog.setIndeterminate(false);
+	                    mProgressDialog.setMax(fileAddresses.size());
+	                    //mProgressDialog.incrementProgressBy(20);
+	                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	
+	                    mProgressDialog.setProgress(50);
+	                    mProgressDialog.show();
+	                    
+	                    
 				       	Intent intnt = new Intent(MaterialListActivity.this,Upload.class);
 	                    intnt.putExtras(b);
 	                    //MaterialListActivity.this.startActivity(intnt);
@@ -386,7 +401,9 @@ public class MaterialListActivity extends CommonActivity  {
 		    	String path=tempURL.replace("https://www2.elearning.rwth-aachen.de", "");
 		    	path=path.replace("/"+fileName, "");
 		    	path=path.substring(26,path.length());
+		    	path="/"+courseName+path;
 		    	path=path.replace("%20", " ");
+		    	//Toast.makeText(context,path, Toast.LENGTH_LONG).show();
 		    	//standard directory for our application
 		    	File applicationDirectory = new File("/sdcard/l2p_to_temp"+path);
 		        if (!applicationDirectory.exists()) {
@@ -396,6 +413,7 @@ public class MaterialListActivity extends CommonActivity  {
 		        File file = new File(applicationDirectory + "/" +fileName.replace("%20", " "));
 		        String later="/sdcard/l2p_to_temp"+path+fileName.replace("%20", " ");
 		        //newFiles.add(later);
+		        downloadedFiles.add(later);
 		        httpclient.getCredentialsProvider().setCredentials(
 		                new AuthScope(null, -1),
 		                new UsernamePasswordCredentials("ep203401", "tehrantehran2"));
@@ -482,12 +500,15 @@ public class MaterialListActivity extends CommonActivity  {
 			
 			////////////////////////
 			
+			mProgressDialog.incrementProgressBy(1);
+			
+			
 			String str=null;
 			if(fileAddresses.size()>0)
 				str=(String)fileAddresses.get(fileAddresses.size()-1);
 			fileAddresses.remove(fileAddresses.size()-1);
 			
-			if(fileAddresses.size()>=0)
+			if(fileAddresses.size()>=10)
 			{
 				Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
 				SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(context);
@@ -497,6 +518,11 @@ public class MaterialListActivity extends CommonActivity  {
 			}
 			if(fileAddresses.size()==0)
 			{
+				mProgressDialog.dismiss();
+				for(int i=0;i<downloadedFiles.size();i++)
+					Toast.makeText(getApplicationContext(),(String)downloadedFiles.get(i), Toast.LENGTH_LONG).show();
+				
+				finish();
 				//for(int i=0;i<newFiles.size();i++)
 //					/Toast.makeText(getApplicationContext(),(String)newFiles.get(i), Toast.LENGTH_LONG).show();
 				//newFiles.clear();

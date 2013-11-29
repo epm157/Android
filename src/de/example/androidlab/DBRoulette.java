@@ -44,6 +44,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -145,19 +146,30 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		}
 		if(flag==2)
 		{
+			Bundle b=this.getIntent().getExtras();
+			if(b != null)
+			{
+				ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
+				Toast.makeText(getApplicationContext(),"Size: "+Materials.size(), Toast.LENGTH_LONG).show();
+			}
+			
+			
 			ArrayList<File> fileArray=new ArrayList<File>();
 			ArrayList<String> test = x.getStringArrayListExtra("test");
 			for(int i=0;i<test.size();i++)
 			{
 				File t = new File(test.get(i));
 				fileArray.add(t);
+				
 				//listFile[index++]=t;
 				
-				Toast.makeText(getApplicationContext(),test.get(i), Toast.LENGTH_LONG).show();
+				//Toast.makeText(getApplicationContext(),test.get(i), Toast.LENGTH_LONG).show();
 			}
 				
 			//listFile = (File[]) fileArray.toArray();
 			File[] fSorted = fileArray.toArray(new File[fileArray.size()]);
+			for(int i=0;i<fSorted.length;i++)
+				Toast.makeText(getApplicationContext(),fSorted[i].toString(), Toast.LENGTH_LONG).show();
 			Upload upload = new Upload(Constants.UploadPhotos_Code,DBRoulette.this, mApi, "", fSorted);
 			upload.execute();
 		}

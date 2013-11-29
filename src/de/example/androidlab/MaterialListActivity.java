@@ -523,11 +523,13 @@ public class MaterialListActivity extends CommonActivity  {
 				
 				if(downloadedFiles.size()>0)
 				{
-					
+					Bundle b = new Bundle();
+                    b.putParcelableArrayList("materials", checkedItems);
 					
 					Intent intnt = new Intent(MaterialListActivity.this,DBRoulette.class);
                     intnt.putStringArrayListExtra("test", (ArrayList<String>) downloadedFiles);
 					intnt.putExtra("flag", 2);
+					intnt.putExtras(b);
 					startActivity(intnt);
 					finish();
 				}

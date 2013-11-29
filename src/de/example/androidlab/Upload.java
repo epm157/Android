@@ -88,8 +88,16 @@ public class Upload extends AsyncTask<Void, Long, Boolean>
                            // By creating a request, we get a handle to the putFile
                            // operation,
                            // so we can cancel it later if we want to
-                           fis = new FileInputStream(file);                      
-                           String path = mPath + file.getName();
+                           fis = new FileInputStream(file); 
+                           //String path = mPath + file.getName();
+                           
+                           
+                           String fileName=file.getName();;
+                           String tPath=file.toString().replace(fileName, "");
+                           tPath=tPath.replace("/sdcard/l2p_to_temp/", "");
+                           String path=tPath+file.getName();
+                           
+                           
                            mRequest = mApi.putFileOverwriteRequest(path, fis,file.length(),null);                  
                           
 

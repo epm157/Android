@@ -8,7 +8,7 @@
         android:id="@+id/uploadButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Button" />
+        android:text="Upload to L2P" />
     
     <TextView
         android:id="@+id/path"

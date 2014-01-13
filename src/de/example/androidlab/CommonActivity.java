@@ -1,6 +1,10 @@
 package de.example.androidlab;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.ksoap2.serialization.SoapObject;
@@ -215,10 +219,24 @@ public class CommonActivity extends Activity {
 				SoapObject obj=null;
 					try {
 						obj = tempService.downloadDocumentItem("13ws-40107", "2");
+						String fileName = obj.getPropertyAsString("filename");
 						Log.d("NAVID",String.valueOf(obj.toString().length()));
-						Log.d("NAVID",obj.getPropertyAsString("filename"));
+						Log.d("NAVID",fileName);
+						
+						String data = obj.getPropertyAsString("filedata");
+						Log.d("NAVID","decoding from Base64: " + data.substring(0,10));
+
+						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
+						Log.d("NAVID","Writing byte array to file: " + fileName);
+						FileOutputStream stream = openFileOutput(fileName, Context.MODE_PRIVATE); 
+						stream.write(btDataFile);
+						stream.close();
+						Log.d("NAVID","finished writing to file");
 					} catch (CommonException e) {
 						// TODO handle error, top level
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				return obj;

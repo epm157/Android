@@ -23,7 +23,7 @@ public class L2P_Services {
 
 	}
 	
-	public SoapObject downloadDocumentItem(String courseId)throws CommonException  {
+	public SoapObject downloadDocumentItem(String courseId, String fileId)throws CommonException  {
 		String methodName = "DownloadDocumentItem";
 		String namespace = "http://cil.rwth-aachen.de/l2p/services";
 		String soapAction = "http://cil.rwth-aachen.de/l2p/services/DownloadDocumentItem";
@@ -33,8 +33,8 @@ public class L2P_Services {
 		String token = l2p_auth.getAccessToken();
 		ServiceRequestBuilder request = new ServiceRequestBuilder(methodName, namespace)
 		.addProperty("userToken", token)
-		.addProperty("courseId", courseId ) //courseID
-		.addProperty("fileId", "4");
+		.addProperty("courseId", courseId ) 
+		.addProperty("fileId", fileId);
 		return request.callService(urlToConnect, soapAction);
 	}
 	

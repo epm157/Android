@@ -26,7 +26,7 @@ public class CourseListActivity extends CommonActivity {
 	//Define some Constants we use for Dialog-creation.
 	private ListView listView;
 
-	private String courseName;
+	
 	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
 	List<LearnRoom> l2pRoomslist;
@@ -69,8 +69,14 @@ public class CourseListActivity extends CommonActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, final View view,
               final int position, long id) {
+        	
+        	
+        	
         	final AdapterView<?> fp = parent;
             AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>() {
+            	
+            	private String courseId=null;
+            	private String courseName=null;
             	@Override
             	protected void onPreExecute() {
             		// TODO Auto-generated method stub
@@ -81,12 +87,12 @@ public class CourseListActivity extends CommonActivity {
             	@Override
             	protected SoapObject doInBackground(Void... params) {
             		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
-                    String iii = item.getId();
+                    courseId = item.getId();
                     courseName=item.getTitle();
                     L2P_Services tempService=new L2P_Services(getAppPreferences());
                     SoapObject obj=null;
         			try {
-        				obj = tempService.getDocumentsOverview(iii);
+        				obj = tempService.getDocumentsOverview(courseId);
         			} catch (CommonException e) {
         				// TODO handle error here
         				e.printStackTrace();
@@ -120,6 +126,7 @@ public class CourseListActivity extends CommonActivity {
                     b.putParcelableArrayList("materials", materials);
                     Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
                     intnt.putExtras(b);
+                    intnt.putExtra("CourseId", courseId);
                     intnt.putExtra("coursename", courseName);
                     CourseListActivity.this.startActivity(intnt);
             	}

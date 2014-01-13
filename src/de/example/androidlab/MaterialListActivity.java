@@ -62,7 +62,7 @@ public class MaterialListActivity extends CommonActivity  {
 	private List<String> downloadedFiles;
 	private ProgressDialog mProgressDialog;
 	private String courseName;
-	
+	private String courseId;
 	private int spinnerValue;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +81,7 @@ public class MaterialListActivity extends CommonActivity  {
 	        if(b != null)
 	        {
 	        	courseName=b.getString("coursename", "null");
+	        	courseId=b.getString("CourseId", "null");
 	        	
 	        	ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
 	        	for(int i=0;i<Materials.size();i++)
@@ -157,69 +158,18 @@ public class MaterialListActivity extends CommonActivity  {
 		
 		
 		Button sync = (Button) findViewById(R.id.syncButton);
+		
 		sync.setOnClickListener(new View.OnClickListener() {
+			
 			@Override
-			public void onClick(View view) {
+			public void onClick(View arg0) {
+				for(MaterialItem item : checkedItems ) {
+					show("downloading : "+ item.getName());
+				}
 				
-				
-				LayoutInflater li = LayoutInflater.from(context);
-				View promptsView = li.inflate(R.layout.dialog_signin, null);
-				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-				alertDialogBuilder.setView(promptsView);
-				final EditText userInput = (EditText) promptsView.findViewById(R.id.username);
-				final EditText passInput = (EditText) promptsView.findViewById(R.id.password);
-				alertDialogBuilder
-				.setCancelable(false)
-				.setPositiveButton("OK",
-				  new DialogInterface.OnClickListener() {
-				    public void onClick(DialogInterface dialog,int id) {
-				    	
-				    	SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(context);
-						SharedPreferences.Editor editor = app_preferences.edit();
-				    	String username=userInput.getText().toString();
-				    	String password=passInput.getText().toString();
-				    	editor.putString("LoginL2P", username);
-				       	editor.putString("PassL2P", password );
-				       	editor.commit(); // Very important
-				       	
-				       	for(int i=0;i<checkedItems.size();i++)
-				       		fileAddresses.add((String)checkedItems.get(i).getUrl());
-				       	
-				       	new DownloadFile().execute(fileAddresses.get(fileAddresses.size()-1).toString(),"temp");
-				       	
-				       	//Bundle b = new Bundle();
-	                    //b.putParcelableArrayList("materials", checkedItems);
-				       	//Toast.makeText(getApplicationContext(),"Size: "+checkedItems.size(),Toast.LENGTH_SHORT).show();
-				       	
-	                    mProgressDialog = new ProgressDialog(MaterialListActivity.this);
-	                    mProgressDialog.setMessage("Please wait until your file is downloaded");
-	                    mProgressDialog.setIndeterminate(false);
-	                    mProgressDialog.setMax(fileAddresses.size());
-	                    //mProgressDialog.incrementProgressBy(20);
-	                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	
-	                    mProgressDialog.setProgress(50);
-	                    mProgressDialog.show();
-	                    
-	                    
-				       	
-	                    //MaterialListActivity.this.startActivity(intnt);
-				    	//finish();
-				    }
-				  })
-				.setNegativeButton("Cancel",
-				  new DialogInterface.OnClickListener() {
-				    public void onClick(DialogInterface dialog,int id) {
-					dialog.cancel();
-				    }
-				  });
-
-			// create alert dialog
-			AlertDialog alertDialog = alertDialogBuilder.create();
-
-			// show it
-			alertDialog.show();
 			}
 		});
+		
 	}
 	
 	
@@ -314,11 +264,6 @@ public class MaterialListActivity extends CommonActivity  {
 			return row;
 		}
 	}
-
-	
-	
-	
-	
 	
 	public void Search(String str, int selectedType, List<MaterialItem> materials) {
 		
@@ -384,172 +329,6 @@ public class MaterialListActivity extends CommonActivity  {
 				getBaseContext(), R.layout.material_list_item,
 				materials);
 		materialList.setAdapter(adapter);
-	}
-	
-	
-	
-	private class DownloadFile extends AsyncTask<String, Integer, String>{
-
-		public void downloadHTTPC(String fileURL) {
-		    DefaultHttpClient httpclient = new DefaultHttpClient();
-		    
-		    try {
-		    	String tempURL=fileURL;
-		    	String fileName = tempURL.substring(tempURL.lastIndexOf('/')+1, tempURL.length() );
-		    	//Toast.makeText(context,fileURL.toString(), Toast.LENGTH_LONG).show();
-		    	String path=tempURL.replace("https://www2.elearning.rwth-aachen.de", "");
-		    	path=path.replace("/"+fileName, "");
-		    	path=path.substring(26,path.length());
-		    	path="/"+courseName+path;
-		    	path=path.replace("%20", " ");
-		    	//Toast.makeText(context,path, Toast.LENGTH_LONG).show();
-		    	//standard directory for our application
-		    	File applicationDirectory = new File("/sdcard/l2p_to_temp"+path);
-		        if (!applicationDirectory.exists()) {
-		    		applicationDirectory.mkdirs(); //return false, if folder already exists
-		    	}
-		        
-		        File file = new File(applicationDirectory + "/" +fileName.replace("%20", " "));
-		        String later="/sdcard/l2p_to_temp"+path+ "/" +fileName.replace("%20", " ");
-		        //newFiles.add(later);
-		        downloadedFiles.add(later);
-		        httpclient.getCredentialsProvider().setCredentials(
-		                new AuthScope(null, -1),
-		                new UsernamePasswordCredentials("ep203401", "tehrantehran2"));
-
-		        HttpGet httpget = new HttpGet(fileURL);
-		        HttpResponse response = httpclient.execute(httpget);
-		        HttpEntity entity = response.getEntity();
-		        if (entity != null) {
-		            final int BUFFER_SIZE = 23 * 1024;
-		            InputStream is = entity.getContent();
-		            BufferedInputStream bis = new BufferedInputStream(is, BUFFER_SIZE);
-		            FileOutputStream fos = new FileOutputStream(file);
-		            byte[] baf = new byte[BUFFER_SIZE];
-		            int actual = 0;
-		            while (actual != -1) {
-		                fos.write(baf, 0, actual);
-		                actual = bis.read(baf, 0, BUFFER_SIZE);
-		            }
-		            fos.close();
-		        }
-		    } catch (IOException e) {
-		        Log.d("ImageManager", "Error: " + e);
-		        
-
-		    } 
-		    catch (Exception e)
-		    {
-		    }
-		    
-		    finally {
-		        httpclient.getConnectionManager().shutdown();
-		    }
-		}
-		
-		//private File SDCardRoot = Environment.getExternalStorageDirectory();
-		@Override
-	    protected String doInBackground(String... sUrl) {
-	        try {
-	        	
-	        	String stringUrl = sUrl[0];
-	        	downloadHTTPC(stringUrl);
-	        } catch (Exception e) {
-	        }
-	        return null;
-		}
-		
-		 @Override
-		    protected void onPreExecute() {
-			 //Toast.makeText(getApplicationContext(),"Download started for file", Toast.LENGTH_LONG).show();
-		        super.onPreExecute();
-		    }
-
-		 @Override
-		 protected void onProgressUpdate(Integer... progress) {
-			 Log.d("ANDRO_ASYNC", "Progress: " + progress[0]);
-			 Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_LONG).show();
-		     super.onProgressUpdate(progress);
-		 }
-
-		@Override
-		protected void onPostExecute(String result) {
-			
-			
-			/*
-			if(result != null)
-			{
-				newFiles.add(result);
-				Toast.makeText(getApplicationContext(),result, Toast.LENGTH_LONG).show();
-				SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(context);
-				SharedPreferences.Editor editor = app_preferences.edit();
-				editor.putString(result, "false");
-		       	editor.commit();
-			}
-			else if(result == null)
-			{
-				 Toast.makeText(getApplicationContext(), "null Returned", Toast.LENGTH_LONG).show();
-				 SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(context);
-					SharedPreferences.Editor editor = app_preferences.edit();
-					editor.putString(result, "false");
-			       	editor.commit();
-			}
-			super.onPostExecute(result);
-			*/
-			
-			////////////////////////
-			
-			mProgressDialog.incrementProgressBy(1);
-			
-			
-			String str=null;
-			if(fileAddresses.size()>0)
-				str=(String)fileAddresses.get(fileAddresses.size()-1);
-			fileAddresses.remove(fileAddresses.size()-1);
-			
-			if(fileAddresses.size()>=10)
-			{
-				Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
-				SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(context);
-				SharedPreferences.Editor editor = app_preferences.edit();
-				editor.putString(str, "false");
-		       	editor.commit();
-			}
-			if(fileAddresses.size()==0)
-			{
-				mProgressDialog.dismiss();
-				//for(int i=0;i<downloadedFiles.size();i++)
-					//Toast.makeText(getApplicationContext(),(String)downloadedFiles.get(i), Toast.LENGTH_LONG).show();
-				
-				if(downloadedFiles.size()>0)
-				{
-					Bundle b = new Bundle();
-                    b.putParcelableArrayList("materials", checkedItems);
-					
-					Intent intnt = new Intent(MaterialListActivity.this,DBRoulette.class);
-                    intnt.putStringArrayListExtra("test", (ArrayList<String>) downloadedFiles);
-					intnt.putExtra("flag", 2);
-					intnt.putExtras(b);
-					startActivity(intnt);
-					finish();
-				}
-				
-				//for(int i=0;i<newFiles.size();i++)
-//					/Toast.makeText(getApplicationContext(),(String)newFiles.get(i), Toast.LENGTH_LONG).show();
-				//newFiles.clear();
-			}
-			else
-			{
-				new DownloadFile().execute(fileAddresses.get(fileAddresses.size()-1).toString(),"temp");
-				super.onPostExecute(result);
-			}
-			
-			
-			
-			
-			
-			
-		}
 	}
 	
 }

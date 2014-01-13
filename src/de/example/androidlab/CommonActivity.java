@@ -1,16 +1,22 @@
 package de.example.androidlab;
 
 
+import java.util.ArrayList;
+
+import org.ksoap2.serialization.SoapObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -87,7 +93,7 @@ public class CommonActivity extends Activity {
     private void createDeveloperMenu() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle("Developer Menu");
-    	CharSequence [] items = { "register Device","show token", "clear token","check validity of token" ,"refresh token","sync"};
+    	CharSequence [] items = { "register Device","show token", "clear token","check validity of token" ,"refresh token","download sample file"};
     	builder.setItems(items, new OnClickListener() {
 			
 			@Override
@@ -106,7 +112,7 @@ public class CommonActivity extends Activity {
 				case 4:
 					break;
 				case 5:
-					show("sync");
+					downloadSampleFile();
 					break;
 				default:
 					break;
@@ -193,5 +199,40 @@ public class CommonActivity extends Activity {
     }
     
 	
+    private void downloadSampleFile() {
+    	
+    	AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
+			ProgressDialog pd;
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				pd = ProgressDialog.show(CommonActivity.this, "Please Wait", "Getting sample file");
+			}
+			
+			@Override
+			protected SoapObject doInBackground(Void... params) {
+				L2P_Services tempService=new L2P_Services(getAppPreferences());
+				SoapObject obj=null;
+					try {
+						obj = tempService.downloadDocumentItem("13ws-40107", "2");
+						Log.d("NAVID",String.valueOf(obj.toString().length()));
+						Log.d("NAVID",obj.getPropertyAsString("filename"));
+					} catch (CommonException e) {
+						// TODO handle error, top level
+						e.printStackTrace();
+					}
+				return obj;
+			}
+			
+			
+			@Override
+			protected void onPostExecute(SoapObject result) {
+				super.onPostExecute(result);
+				pd.dismiss();
+			}
+		};
+		task.execute();
+    	
+    }
 	
 }

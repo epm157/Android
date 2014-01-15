@@ -126,7 +126,7 @@ public class CourseListActivity extends CommonActivity {
                     b.putParcelableArrayList("materials", materials);
                     Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
                     intnt.putExtras(b);
-                    intnt.putExtra("CourseId", courseId);
+                    intnt.putExtra("courseid", courseId);
                     intnt.putExtra("coursename", courseName);
                     CourseListActivity.this.startActivity(intnt);
             	}

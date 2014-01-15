@@ -218,20 +218,16 @@ public class CommonActivity extends Activity {
 				L2P_Services tempService=new L2P_Services(getAppPreferences());
 				SoapObject obj=null;
 					try {
-						obj = tempService.downloadDocumentItem("13ws-40107", "2");
+						obj = tempService.downloadDocumentItem("13ss-23347", "2");
 						String fileName = obj.getPropertyAsString("filename");
-						Log.d("NAVID",String.valueOf(obj.toString().length()));
-						Log.d("NAVID",fileName);
-						
 						String data = obj.getPropertyAsString("filedata");
-						Log.d("NAVID","decoding from Base64: " + data.substring(0,10));
-
 						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
-						Log.d("NAVID","Writing byte array to file: " + fileName);
-						FileOutputStream stream = openFileOutput(fileName, Context.MODE_PRIVATE); 
-						stream.write(btDataFile);
-						stream.close();
-						Log.d("NAVID","finished writing to file");
+						File file = new File("/sdcard/l2p_to_temp/"+fileName);
+						FileOutputStream fos = null;
+			            fos = new FileOutputStream(file);
+			            fos.write(btDataFile);
+			            fos.close();
+
 					} catch (CommonException e) {
 						// TODO handle error, top level
 						e.printStackTrace();

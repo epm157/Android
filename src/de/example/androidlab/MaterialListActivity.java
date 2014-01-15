@@ -14,6 +14,8 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.ksoap2.serialization.SoapObject;
+
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -52,6 +54,7 @@ public class MaterialListActivity extends CommonActivity  {
 	MaterialArrayAdapter adapter;
 	List<MaterialItem> materialsList;
 	private ArrayList<MaterialItem> checkedItems;
+	private ArrayList<MaterialItem> downloadedItems;
 	private List<MaterialItem> workingMaterials;
 	private EditText mtxt;
 	private Button cancelButton;
@@ -63,6 +66,8 @@ public class MaterialListActivity extends CommonActivity  {
 	private ProgressDialog mProgressDialog;
 	private String courseName;
 	private String courseId;
+	L2P_Services tempService;
+	
 	private int spinnerValue;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -72,16 +77,18 @@ public class MaterialListActivity extends CommonActivity  {
 
 		fileAddresses=new ArrayList<String>();
 		downloadedFiles=new ArrayList<String>();
+		downloadedFiles.clear();
 		materialsList=new ArrayList<MaterialItem>();
 		spinnerValue=0;
 		checkedItems=new ArrayList<MaterialItem>();
+		tempService=new L2P_Services(getAppPreferences());
 		
 		 Bundle b=this.getIntent().getExtras();
 	        
 	        if(b != null)
 	        {
 	        	courseName=b.getString("coursename", "null");
-	        	courseId=b.getString("CourseId", "null");
+	        	courseId=b.getString("courseid", "null");
 	        	
 	        	ArrayList<Parcelable> Materials=b.getParcelableArrayList("materials");
 	        	for(int i=0;i<Materials.size();i++)
@@ -158,18 +165,28 @@ public class MaterialListActivity extends CommonActivity  {
 		
 		
 		Button sync = (Button) findViewById(R.id.syncButton);
-		
 		sync.setOnClickListener(new View.OnClickListener() {
-			
 			@Override
-			public void onClick(View arg0) {
-				for(MaterialItem item : checkedItems ) {
-					show("downloading : "+ item.getName());
-				}
+			public void onClick(View view) {
+				//downloadedItems.clear();
+				//for(MaterialItem mi:checkedItems)
+					//downloadedItems.add(mi);
+				downloadedItems=checkedItems;      
 				
+				new DownloadFile().execute(checkedItems.get(checkedItems.size()-1));
+	                    mProgressDialog = new ProgressDialog(MaterialListActivity.this);
+	                    mProgressDialog.setMessage("Please wait until your file is downloaded");
+	                    mProgressDialog.setIndeterminate(false);
+	                    mProgressDialog.setMax(checkedItems.size());
+	                    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);	
+	                    mProgressDialog.setProgress(50);
+	                    mProgressDialog.show();
+	                    
+	                    
+	                    
+	
 			}
 		});
-		
 	}
 	
 	
@@ -239,24 +256,6 @@ public class MaterialListActivity extends CommonActivity  {
 					}
 				});
 				
-						
-						/*
-						
-				cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-					@Override
-					public void onCheckedChanged(CompoundButton buttonView,
-							boolean isChecked) {
-						Toast.makeText(getApplicationContext(),String.valueOf(materialitem.getName()),Toast.LENGTH_SHORT).show();
-						materialitem.setState(isChecked);
-						if(isChecked)
-							checkedItems.add(materialitem.getName());
-						else
-							checkedItems.remove(materialitem.getName());
-						//Toast.makeText(getApplicationContext(),String.valueOf(materialitem.getName()),Toast.LENGTH_SHORT).show();
-					}
-				});
-				*/
-				// We need the Tag in order to identify the button later.
 				if (l2pnameText != null) {
 					l2pnameText.setText(materialitem.getName());
 				}
@@ -264,7 +263,6 @@ public class MaterialListActivity extends CommonActivity  {
 			return row;
 		}
 	}
-	
 	public void Search(String str, int selectedType, List<MaterialItem> materials) {
 		
 		List<MaterialItem> mats=new ArrayList<MaterialItem>();
@@ -331,5 +329,99 @@ public class MaterialListActivity extends CommonActivity  {
 		materialList.setAdapter(adapter);
 	}
 	
-}
+	
+	
+	
+	private class DownloadFile extends AsyncTask<MaterialItem, Integer, String>{
 
+		public void downloadMaterialItem(MaterialItem mi) {
+		    
+		    try {
+		    	String fileName =mi.getName();
+		    	String path=courseName;
+		    	File applicationDirectory = new File("/sdcard/l2p_to_temp/"+path);
+		        if (!applicationDirectory.exists()) 
+		    		applicationDirectory.mkdirs(); //return false, if folder already exists
+		        
+		        
+		        File file = new File(applicationDirectory +"/"+fileName);
+		        String later="/sdcard/l2p_to_temp/"+path+ "/" +fileName;
+		        downloadedFiles.add(later);
+		     
+				SoapObject obj=null;
+						obj = tempService.downloadDocumentItem(courseId, mi.getId());
+						String data = obj.getPropertyAsString("filedata");
+						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
+						FileOutputStream fos = null;
+			            fos = new FileOutputStream(file);
+			            fos.write(btDataFile);
+			            fos.close();
+		        } 
+		      
+		     catch (IOException e) {
+		        Log.d("ImageManager", "Error: " + e);
+		        
+
+		    } 
+		    catch (Exception e)
+		    {
+		    }
+		    
+		    finally {
+		    	
+		    }
+		}
+
+		@Override
+	    protected String doInBackground(MaterialItem... sUrl) {
+	        try {
+	        	
+	        	MaterialItem item = sUrl[0];
+	        	downloadMaterialItem(item);
+	        } catch (Exception e) {
+	        }
+	        return null;
+		}
+		
+		 @Override
+		    protected void onPreExecute() {
+		        super.onPreExecute();
+		    }
+
+		 @Override
+		 protected void onProgressUpdate(Integer... progress) {
+			 Log.d("ANDRO_ASYNC", "Progress: " + progress[0]);
+			 Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_LONG).show();
+		     super.onProgressUpdate(progress);
+		 }
+
+		@Override
+		protected void onPostExecute(String result) {
+			mProgressDialog.incrementProgressBy(1);
+			checkedItems.remove(checkedItems.size()-1);
+			
+			//Toast.makeText(getApplicationContext(),downloadedItems.size()+"", Toast.LENGTH_LONG).show();
+			if(checkedItems.size()==0)
+			{
+				mProgressDialog.dismiss();
+				if(downloadedFiles.size()>0)
+				{
+					
+					Bundle b = new Bundle();
+                    b.putParcelableArrayList("materials", downloadedItems);	
+					Intent intnt = new Intent(MaterialListActivity.this,DBRoulette.class);
+                    intnt.putStringArrayListExtra("test", (ArrayList<String>) downloadedFiles);
+					intnt.putExtra("flag", 2);
+					intnt.putExtras(b);
+					startActivity(intnt);
+					finish();
+				}
+			}
+			else if(checkedItems.size()>0)
+			{
+				new DownloadFile().execute(checkedItems.get(checkedItems.size()-1));
+				super.onPostExecute(result);
+			}
+		}
+	}
+}

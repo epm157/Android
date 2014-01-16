@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.ksoap2.serialization.SoapObject;
 
@@ -45,6 +47,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -97,8 +100,8 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 	Button l2p2device;
 	Button device2l2p;
 	// Button link;
-	Button pref;
-
+	Button autoSync;
+	private String addCourse="false";
 	private Button mSubmit;
 
 	final static private int NEW_PICTURE = 1;
@@ -122,10 +125,19 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		// Basic Android widgets
 		setContentView(R.layout.main);
 		checkAppKeySetup();
+		
+		
 
 		index=0;
 		Intent x = this.getIntent();
 		int flag = x.getIntExtra("flag", 0);
+		addCourse=x.getStringExtra("addcourse");
+		if(addCourse!=null)
+			if(addCourse.startsWith("t"))
+			{
+				getCourseList(1);
+			}
+		
 		String[] addresses = x.getStringArrayExtra("addresses");
 		if (flag == 10) {
 			String path = "/sdcard/l2p/";
@@ -213,62 +225,7 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		l2p2device=(Button) findViewById(R.id.l2p2device);
 		l2p2device.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				
-				AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
-					ProgressDialog pd;
-					@Override
-					protected void onPreExecute() {
-						super.onPreExecute();
-						pd = ProgressDialog.show(DBRoulette.this, "Please Wait", "Getting List Of Courses");
-					}
-					
-					@Override
-					protected SoapObject doInBackground(Void... params) {
-						L2P_Services tempService=new L2P_Services(getAppPreferences());
-						SoapObject obj=null;
-							try {
-								obj = tempService.getCourseList();
-							} catch (CommonException e) {
-								// TODO handle error, top level
-								e.printStackTrace();
-							}
-						return obj;
-					}
-					
-					
-					@Override
-					protected void onPostExecute(SoapObject result) {
-						super.onPostExecute(result);
-						pd.dismiss();
-						ArrayList<LearnRoom> rooms=new ArrayList<LearnRoom>();
-						
-						int count=result.getPropertyCount();
-						for(int i=0;i<count;i++)
-						{
-							SoapObject first =(SoapObject)result.getProperty(i);
-							String t=first.getPropertyAsString("Title");
-							String id=first.getPropertyAsString("ID");
-							LearnRoom lr=new LearnRoom(t,id);	
-							rooms.add(lr);
-						}
-						
-						Bundle b = new Bundle();
-						b.putParcelableArrayList("rooms", rooms);
-						Intent i = new Intent(DBRoulette.this,CourseListActivity.class);
-						i.putExtras(b);
-						DBRoulette.this.startActivity(i);
-						//finish();
-					}
-				};
-				task.execute();
-				
-				
-				
-				
-               
-        		
-				
-                
+				getCourseList(0);
 			}
 		});
 		
@@ -278,6 +235,17 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 				// This logs you out if you're logged in, or vice versa
 				Intent i = new Intent(getBaseContext(),
 						ExplorerActivity.class);
+				startActivity(i);
+
+			}
+		});
+		
+		autoSync=(Button) findViewById(R.id.autoSync);
+		autoSync.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// This logs you out if you're logged in, or vice versa
+				Intent i = new Intent(getBaseContext(),
+						AutoSyncActivity.class);
 				startActivity(i);
 
 			}
@@ -413,6 +381,72 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 		}
 	}
 
+	public void getCourseList(final int num)
+	{
+
+		
+		AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
+			ProgressDialog pd;
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				pd = ProgressDialog.show(DBRoulette.this, "Please Wait", "Getting List Of Courses");
+			}
+			
+			@Override
+			protected SoapObject doInBackground(Void... params) {
+				L2P_Services tempService=new L2P_Services(getAppPreferences());
+				SoapObject obj=null;
+					try {
+						obj = tempService.getCourseList();
+					} catch (CommonException e) {
+						// TODO handle error, top level
+						e.printStackTrace();
+					}
+				return obj;
+			}
+			
+			
+			@Override
+			protected void onPostExecute(SoapObject result) {
+				super.onPostExecute(result);
+				pd.dismiss();
+				ArrayList<LearnRoom> rooms=new ArrayList<LearnRoom>();
+				
+				int count=result.getPropertyCount();
+				for(int i=0;i<count;i++)
+				{
+					SoapObject first =(SoapObject)result.getProperty(i);
+					String t=first.getPropertyAsString("Title");
+					String id=first.getPropertyAsString("ID");
+					LearnRoom lr=new LearnRoom(t,id);	
+					rooms.add(lr);
+				}
+				
+				Bundle b = new Bundle();
+				b.putParcelableArrayList("rooms", rooms);
+				Intent i = new Intent(DBRoulette.this,CourseListActivity.class);
+				i.putExtras(b);
+				if(num==1)
+				{
+					show("DB Autosync");
+					i.putExtra("addcourse", "true");
+					DBRoulette.this.startActivity(i);
+					finish();
+				}
+					
+				else
+				{
+					show("DB not-Autosync");
+					i.putExtra("addcourse", "false");
+					DBRoulette.this.startActivity(i);
+				}
+					
+			}
+		};
+		task.execute();
+		
+	}
 	private void showToast(String msg) {
 		Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
 		error.show();

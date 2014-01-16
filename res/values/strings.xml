@@ -28,5 +28,6 @@
     <string name="dbx_update">Update Dropbox</string>
     <string name="dbx_update_button_ok">Update</string>
     <string name="title_activity_explorer">ExplorerActivity</string>
+    <string name="title_activity_auto_sync">AutoSyncActivity</string>
 
 </resources>

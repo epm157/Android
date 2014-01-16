@@ -1,15 +1,19 @@
 package de.example.androidlab;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.ksoap2.serialization.SoapObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +30,7 @@ public class CourseListActivity extends CommonActivity {
 	//Define some Constants we use for Dialog-creation.
 	private ListView listView;
 
-	
+	private String addCourse="false";
 	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
 	List<LearnRoom> l2pRoomslist;
@@ -39,19 +43,16 @@ public class CourseListActivity extends CommonActivity {
         listView = (ListView) findViewById(R.id.listView);
       
         l2pRoomslist=new ArrayList<LearnRoom>();
-        
+        Intent x = this.getIntent();
         Bundle b=this.getIntent().getExtras();
-        
+        addCourse=x.getStringExtra("addcourse");
         if(b != null)
         {
-        	//Toast.makeText(this,"here", Toast.LENGTH_LONG).show();
         	ArrayList<Parcelable> rooms=b.getParcelableArrayList("rooms");
         	for(int i=0;i<rooms.size();i++)
         	{
         		LearnRoom lm=(LearnRoom)rooms.get(i);
         		l2pRoomslist.add(lm);
-        		
-        		//Toast.makeText(this,lm.getTitle(), Toast.LENGTH_LONG).show();
         	}
         }
         else
@@ -70,70 +71,91 @@ public class CourseListActivity extends CommonActivity {
         public void onItemClick(AdapterView<?> parent, final View view,
               final int position, long id) {
         	
-        	
-        	
         	final AdapterView<?> fp = parent;
-            AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>() {
-            	
-            	private String courseId=null;
-            	private String courseName=null;
-            	@Override
-            	protected void onPreExecute() {
-            		// TODO Auto-generated method stub
-            		super.onPreExecute();
-            	}
-            	
-            	
-            	@Override
-            	protected SoapObject doInBackground(Void... params) {
-            		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
-                    courseId = item.getId();
-                    courseName=item.getTitle();
-                    L2P_Services tempService=new L2P_Services(getAppPreferences());
-                    SoapObject obj=null;
-        			try {
-        				obj = tempService.getDocumentsOverview(courseId);
-        			} catch (CommonException e) {
-        				// TODO handle error here
-        				e.printStackTrace();
-        			}
-        			
-        			return obj;
-                    
-            	}
-            	
-            	@Override
-            	protected void onPostExecute(SoapObject result) {
-            		super.onPostExecute(result);
-            		ArrayList<MaterialItem> materials=new ArrayList<MaterialItem>();
-                    materials.clear();
-                    
-                    int count=result.getPropertyCount();
-                    for(int i=0;i<count;i++)
-                    {
-                            SoapObject first =(SoapObject)result.getProperty(i);
-                            String idd=first.getPropertyAsString("Id");
-                            String name=first.getPropertyAsString("Name");
-                            String url=first.getPropertyAsString("Url");
-                            String ft=first.getPropertyAsString("FileType");
-                            String lu=first.getPropertyAsString("LastUpdated").toString();
-                            String state="0";
-                            MaterialItem lr=new MaterialItem(idd, name, url, ft, lu, state);        
-                            materials.add(lr);
-                    }
-                    
-                    Bundle b = new Bundle();
-                    b.putParcelableArrayList("materials", materials);
-                    Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
-                    intnt.putExtras(b);
-                    intnt.putExtra("courseid", courseId);
-                    intnt.putExtra("coursename", courseName);
-                    CourseListActivity.this.startActivity(intnt);
-            	}
-            	
-            };
+        	
+        	
+      		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
+      		
+    		if(addCourse.startsWith("t"))
+    		{
+    			
+    			Set<String> pairs = new HashSet<String>();
+        		SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        		SharedPreferences.Editor editor = app_preferences.edit();
+        		if(app_preferences.getStringSet("courses", null) != null)
+        			pairs=app_preferences.getStringSet("courses", null);
+        		pairs.add(item.getId()+item.getTitle());
+        		editor.clear();
+        		editor.putStringSet("courses", pairs);
+        		editor.commit();
+        		
+        		Intent i = new Intent(getBaseContext(),AutoSyncActivity.class);
+				 startActivity(i);
+				 finish();
+    		}
+    		else
+    		{
+    			show("CourseList not-add course");
+    			AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>() {
+                	
+                	private String courseId=null;
+                	private String courseName=null;
+                	@Override
+                	protected void onPreExecute() {
+                		// TODO Auto-generated method stub
+                		super.onPreExecute();
+                	}        	
+                	@Override
+                	protected SoapObject doInBackground(Void... params) {
+                		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
+                        courseId = item.getId();
+                        courseName=item.getTitle();
+                        L2P_Services tempService=new L2P_Services(getAppPreferences());
+                        SoapObject obj=null;
+            			try {
+            				obj = tempService.getDocumentsOverview(courseId);
+            			} catch (CommonException e) {
+            				// TODO handle error here
+            				e.printStackTrace();
+            			}
+            			return obj;
+                	}
+                	@Override
+                	protected void onPostExecute(SoapObject result) {
+                		super.onPostExecute(result);
+                		ArrayList<MaterialItem> materials=new ArrayList<MaterialItem>();
+                        materials.clear();
+                        
+                        int count=result.getPropertyCount();
+                        for(int i=0;i<count;i++)
+                        {
+                                SoapObject first =(SoapObject)result.getProperty(i);
+                                String idd=first.getPropertyAsString("Id");
+                                String name=first.getPropertyAsString("Name");
+                                String url=first.getPropertyAsString("Url");
+                                String ft=first.getPropertyAsString("FileType");
+                                String lu=first.getPropertyAsString("LastUpdated").toString();
+                                String state="0";
+                                MaterialItem lr=new MaterialItem(idd, name, url, ft, lu, state);        
+                                materials.add(lr);
+                        }
+                        
+                        Bundle b = new Bundle();
+                        b.putParcelableArrayList("materials", materials);
+                        Intent intnt = new Intent(CourseListActivity.this,MaterialListActivity.class);
+                        intnt.putExtras(b);
+                        intnt.putExtra("courseid", courseId);
+                        intnt.putExtra("coursename", courseName);
+                        CourseListActivity.this.startActivity(intnt);
+                	}
+                	
+                };
+                
+                task.execute();
+    		}
+    		
+    			
             
-            task.execute();
           }
         });
     }

@@ -46,11 +46,11 @@
 	    android:textColor="#ffffff" />
 	
 	<Button
-	    android:id="@+id/pref"
+	    android:id="@+id/autoSync"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:enabled="true"
-	    android:text="Preferences"
+	    android:text="Auto Sync"
 	    android:textColor="#ffffff" />
 
 </LinearLayout>

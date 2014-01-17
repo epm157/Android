@@ -7,6 +7,8 @@ import java.util.Set;
 
 import org.ksoap2.serialization.SoapObject;
 
+import roboguice.util.Ln;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,7 +28,7 @@ import android.widget.Toast;
 /**
  * Created by Alex on 6/23/13.
  */
-public class CourseListActivity extends CommonActivity {
+public class CourseListActivity extends BaseActivity {
 	//Define some Constants we use for Dialog-creation.
 	private ListView listView;
 
@@ -95,7 +97,7 @@ public class CourseListActivity extends CommonActivity {
     		}
     		else
     		{
-    			show("CourseList not-add course");
+    			Ln.v("CourseList not-add course");
     			AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>() {
                 	
                 	private String courseId=null;
@@ -110,11 +112,10 @@ public class CourseListActivity extends CommonActivity {
                 		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
                         courseId = item.getId();
                         courseName=item.getTitle();
-                        L2P_Services tempService=new L2P_Services(getAppPreferences());
                         SoapObject obj=null;
             			try {
-            				obj = tempService.getDocumentsOverview(courseId);
-            			} catch (CommonException e) {
+            				obj = getAppService().getDocumentsOverview(courseId);
+            			} catch (AppException e) {
             				// TODO handle error here
             				e.printStackTrace();
             			}

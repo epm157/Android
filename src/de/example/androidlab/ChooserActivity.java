@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.dropbox.chooser.android.DbxChooser;
 
+//TODO must be subclass of RoboListActivity. if not subclass of BaseActivity, does not have access to AppService
+
 public class ChooserActivity extends ListActivity {
 	 static final String APP_KEY = "yddybp75i7468u9"/* This is for you to fill in! */;
 	 static final int DBX_CHOOSER_REQUEST = 0;  // You can change this if needed

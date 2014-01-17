@@ -19,6 +19,10 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
+//TODO must be subclass of RoboListActivity. if not subclass of BaseActivity, does not have access to AppService
+
 public class ExplorerActivity extends ListActivity {
 	private List<String> item = null;
 	private List<String> path = null;

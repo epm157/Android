@@ -46,11 +46,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MaterialListActivity extends CommonActivity  {
+public class MaterialListActivity extends BaseActivity  {
 	
 	final Context context = this;
 	private ListView listView;
-	final CommonActivity act=this;
 	MaterialArrayAdapter adapter;
 	List<MaterialItem> materialsList;
 	private ArrayList<MaterialItem> checkedItems;
@@ -66,7 +65,6 @@ public class MaterialListActivity extends CommonActivity  {
 	private ProgressDialog mProgressDialog;
 	private String courseName;
 	private String courseId;
-	L2P_Services tempService;
 	
 	private int spinnerValue;
 	@Override
@@ -81,7 +79,6 @@ public class MaterialListActivity extends CommonActivity  {
 		materialsList=new ArrayList<MaterialItem>();
 		spinnerValue=0;
 		checkedItems=new ArrayList<MaterialItem>();
-		tempService=new L2P_Services(getAppPreferences());
 		
 		 Bundle b=this.getIntent().getExtras();
 	        
@@ -349,7 +346,7 @@ public class MaterialListActivity extends CommonActivity  {
 		        downloadedFiles.add(later);
 		     
 				SoapObject obj=null;
-						obj = tempService.downloadDocumentItem(courseId, mi.getId());
+						obj = getAppService().downloadDocumentItem(courseId, mi.getId());
 						String data = obj.getPropertyAsString("filedata");
 						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
 						FileOutputStream fos = null;

@@ -4,10 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 
-public class LoginActivity extends CommonActivity {
+public class LoginActivity extends BaseActivity {
 	EditText textEditUser;
 	EditText textEditPass;
-	public  final CommonActivity mcontext = this;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.view.Menu;
 import android.widget.Button;
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 	SharedPreferences preferences;
 	Button l2p2dropbox;
 	Button dropbox2l2p;

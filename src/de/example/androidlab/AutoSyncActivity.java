@@ -21,7 +21,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class AutoSyncActivity extends CommonActivity {
+public class AutoSyncActivity extends BaseActivity {
 	
 	private ListView listView;
 	RoomArrayAdapter adapter;
@@ -39,7 +39,6 @@ public class AutoSyncActivity extends CommonActivity {
 			
 			@Override
 			public boolean onLongClick(View v) {
-				show("Clicked");
 				return false;
 			}
 		}); 
@@ -56,7 +55,6 @@ public class AutoSyncActivity extends CommonActivity {
 				for(String s:strs)
 				{
 					l2pRoomslist.add(s.substring(10));
-					//show(""+(i++));
 				}
 			}
 				

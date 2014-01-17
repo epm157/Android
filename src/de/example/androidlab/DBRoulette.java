@@ -37,6 +37,8 @@ import java.util.Set;
 
 import org.ksoap2.serialization.SoapObject;
 
+import roboguice.util.Ln;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -62,7 +64,7 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.TokenPair;
 
-public class DBRoulette extends CommonActivity implements API_Listener {
+public class DBRoulette extends BaseActivity implements API_Listener {
 	private static final String TAG = "DBRoulette";
 
 	// /////////////////////////////////////////////////////////////////////////
@@ -395,11 +397,10 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 			
 			@Override
 			protected SoapObject doInBackground(Void... params) {
-				L2P_Services tempService=new L2P_Services(getAppPreferences());
 				SoapObject obj=null;
 					try {
-						obj = tempService.getCourseList();
-					} catch (CommonException e) {
+						obj = getAppService().getCourseList();
+					} catch (AppException e) {
 						// TODO handle error, top level
 						e.printStackTrace();
 					}
@@ -429,7 +430,7 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 				i.putExtras(b);
 				if(num==1)
 				{
-					show("DB Autosync");
+					Ln.v("DB Autosync");
 					i.putExtra("addcourse", "true");
 					DBRoulette.this.startActivity(i);
 					finish();
@@ -437,7 +438,7 @@ public class DBRoulette extends CommonActivity implements API_Listener {
 					
 				else
 				{
-					show("DB not-Autosync");
+					Ln.v("DB not-Autosync");
 					i.putExtra("addcourse", "false");
 					DBRoulette.this.startActivity(i);
 				}

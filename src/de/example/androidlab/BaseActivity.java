@@ -62,6 +62,7 @@ public class BaseActivity extends RoboActivity {
     protected AppService getAppService() {
     	return appService;
     }
+   
     
 
 
@@ -133,7 +134,7 @@ public class BaseActivity extends RoboActivity {
     private void createDeveloperMenu() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle("Developer Menu");
-    	CharSequence [] items = { "register Device","ping sevice", "clear l2p tokens","check injection" ,"refresh token","download sample file"};
+    	CharSequence [] items = { "register Device","ping sevice", "clear l2p tokens","Stop Service" ,"refresh token","download sample file"};
     	builder.setItems(items, new OnClickListener() {
 			
 			@Override
@@ -149,8 +150,7 @@ public class BaseActivity extends RoboActivity {
 					getAppService().clearL2pTokens();
 					break;
 				case 3:
-					if(getAppService().getSrv() == null) Ln.v("fail");
-					else Ln.v("success");
+					getAppService().stopMe();
 					break;
 				case 4:
 					break;

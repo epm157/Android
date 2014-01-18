@@ -19,10 +19,14 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 public class BaseActivity extends RoboActivity {
 	
@@ -106,17 +110,10 @@ public class BaseActivity extends RoboActivity {
 			protected void onPostExecute(String url) {
 				super.onPostExecute(url);
 				AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(BaseActivity.this);
-				WebView wv = new WebView(BaseActivity.this);
-				// TODO add a text box here, to enable keyboard
-				dialogBuilder.setView(wv);
-				dialogBuilder.setNeutralButton("close", new OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-
-					}
-				});
+				LayoutInflater inflater = BaseActivity.this.getLayoutInflater();
+	            View dialogView = inflater.inflate(R.layout.customdialog, null);
+	            dialogBuilder.setView(dialogView);
+	            WebView wv = (WebView) dialogView.findViewById(R.id.webView1);
 				wv.loadUrl(url);
 				wv.setWebViewClient(new WebViewClient() {
 					@Override

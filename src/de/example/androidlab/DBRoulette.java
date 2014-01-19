@@ -247,7 +247,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			public void onClick(View v) {
 				// This logs you out if you're logged in, or vice versa
 				Intent i = new Intent(getBaseContext(),
-						AutoSyncActivity.class);
+						WatchCoursesSelectionActivity.class);
 				startActivity(i);
 
 			}
@@ -399,7 +399,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			protected SoapObject doInBackground(Void... params) {
 				SoapObject obj=null;
 					try {
-						obj = getAppService().getCourseList();
+						obj = getAppService().l2pService_allCourses();
 					} catch (AppException e) {
 						// TODO handle error, top level
 						e.printStackTrace();
@@ -412,7 +412,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			protected void onPostExecute(SoapObject result) {
 				super.onPostExecute(result);
 				pd.dismiss();
-				ArrayList<LearnRoom> rooms=new ArrayList<LearnRoom>();
+				ArrayList<Course> rooms=new ArrayList<Course>();
 				
 				int count=result.getPropertyCount();
 				for(int i=0;i<count;i++)
@@ -420,7 +420,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 					SoapObject first =(SoapObject)result.getProperty(i);
 					String t=first.getPropertyAsString("Title");
 					String id=first.getPropertyAsString("ID");
-					LearnRoom lr=new LearnRoom(t,id);	
+					Course lr=new Course(t,id);	
 					rooms.add(lr);
 				}
 				

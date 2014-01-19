@@ -33,16 +33,17 @@ public class BaseActivity extends RoboActivity {
 	
 	private AlertDialog developerMenu;
 	private AppService appService;  
+	private ServiceConnection connection;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        Intent intent = new Intent(this, AppService.class);
+        Intent intent = new Intent(getApplicationContext(), AppService.class);
 		startService(intent);
 		
-		Intent intent2 = new Intent(this, AppService.class);
-		bindService(intent2, new ServiceConnection() {
+		Intent intent2 = new Intent(getApplicationContext(), AppService.class);
+		connection = new ServiceConnection() {
 			@Override
 			public void onServiceDisconnected(ComponentName name) {
 				Ln.v("onServiceDisconnected()");
@@ -54,9 +55,18 @@ public class BaseActivity extends RoboActivity {
 				AppServiceBinder binder = (AppServiceBinder) service;
 				appService = binder.getAppService();
 			}
-		}, BIND_ABOVE_CLIENT);
+		};
+				
+		bindService(intent2,connection , BIND_AUTO_CREATE);
         
     	this.createDeveloperMenu();
+    }
+    
+    
+    @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	unbindService(connection);
     }
     
     protected AppService getAppService() {
@@ -134,7 +144,7 @@ public class BaseActivity extends RoboActivity {
     private void createDeveloperMenu() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setTitle("Developer Menu");
-    	CharSequence [] items = { "register Device","ping sevice", "clear l2p tokens","Stop Service" ,"refresh token","download sample file"};
+    	CharSequence [] items = { "register Device","ping sevice", "clear l2p tokens","Stop Service" ,"start watch list","download sample file"};
     	builder.setItems(items, new OnClickListener() {
 			
 			@Override
@@ -153,6 +163,8 @@ public class BaseActivity extends RoboActivity {
 					getAppService().stopMe();
 					break;
 				case 4:
+					Intent i = new Intent(BaseActivity.this, WatchCoursesSelectionActivity.class);
+					BaseActivity.this.startActivity(i);
 					break;
 				case 5:
 					downloadSampleFile();
@@ -192,7 +204,7 @@ public class BaseActivity extends RoboActivity {
 			protected SoapObject doInBackground(Void... params) {
 				SoapObject obj=null;
 					try {
-						obj = getAppService().downloadDocumentItem("13ss-23347", "2");
+						obj = getAppService().l2pService_downloadFile("13ss-23347", "2");
 						String fileName = obj.getPropertyAsString("filename");
 						String data = obj.getPropertyAsString("filedata");
 						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);

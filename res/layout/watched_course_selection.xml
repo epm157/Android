@@ -6,9 +6,9 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/watch_descroption"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/table_list_title"
         android:gravity="center"
         android:text="Please select the courses to be synchronized:"
@@ -25,16 +25,10 @@
         android:text="Done" />
 
     <ListView
-        android:id="@+id/listView"
+        android:id="@+id/watched_course_selection_list"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="0.08" >
-        
-       
-     
-        
-        
-        
 
     </ListView>
 

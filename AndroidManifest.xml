@@ -80,8 +80,8 @@
             android:label="@string/title_activity_explorer" >
         </activity>
         <activity
-            android:name="de.example.androidlab.AutoSyncActivity"
-            android:label="@string/title_activity_auto_sync" >
+            android:name="de.example.androidlab.WatchCoursesSelectionActivity"
+            android:label="@string/title_activity_watchedListselection" >
         </activity>
     </application>
 

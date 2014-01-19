@@ -346,7 +346,7 @@ public class MaterialListActivity extends BaseActivity  {
 		        downloadedFiles.add(later);
 		     
 				SoapObject obj=null;
-						obj = getAppService().downloadDocumentItem(courseId, mi.getId());
+						obj = getAppService().l2pService_downloadFile(courseId, mi.getId());
 						String data = obj.getPropertyAsString("filedata");
 						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
 						FileOutputStream fos = null;

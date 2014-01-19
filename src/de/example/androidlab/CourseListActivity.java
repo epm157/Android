@@ -35,7 +35,7 @@ public class CourseListActivity extends BaseActivity {
 	private String addCourse="false";
 	//private ArrayList<LearnRoom> roomsList=new ArrayList<LearnRoom>();
 	RoomArrayAdapter adapter;
-	List<LearnRoom> l2pRoomslist;
+	List<Course> l2pRoomslist;
 	
     public void onCreate(Bundle savedInstanceState) 
     {
@@ -44,7 +44,7 @@ public class CourseListActivity extends BaseActivity {
         setContentView(R.layout.activity_courselist);
         listView = (ListView) findViewById(R.id.listView);
       
-        l2pRoomslist=new ArrayList<LearnRoom>();
+        l2pRoomslist=new ArrayList<Course>();
         Intent x = this.getIntent();
         Bundle b=this.getIntent().getExtras();
         addCourse=x.getStringExtra("addcourse");
@@ -53,7 +53,7 @@ public class CourseListActivity extends BaseActivity {
         	ArrayList<Parcelable> rooms=b.getParcelableArrayList("rooms");
         	for(int i=0;i<rooms.size();i++)
         	{
-        		LearnRoom lm=(LearnRoom)rooms.get(i);
+        		Course lm=(Course)rooms.get(i);
         		l2pRoomslist.add(lm);
         	}
         }
@@ -76,22 +76,12 @@ public class CourseListActivity extends BaseActivity {
         	final AdapterView<?> fp = parent;
         	
         	
-      		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
+      		final Course item = (Course) fp.getItemAtPosition(position);
       		
     		if(addCourse.startsWith("t"))
     		{
     			
-    			Set<String> pairs = new HashSet<String>();
-        		SharedPreferences app_preferences =	PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        		SharedPreferences.Editor editor = app_preferences.edit();
-        		if(app_preferences.getStringSet("courses", null) != null)
-        			pairs=app_preferences.getStringSet("courses", null);
-        		pairs.add(item.getId()+item.getTitle());
-        		editor.clear();
-        		editor.putStringSet("courses", pairs);
-        		editor.commit();
-        		
-        		Intent i = new Intent(getBaseContext(),AutoSyncActivity.class);
+        		Intent i = new Intent(getBaseContext(),WatchCoursesSelectionActivity.class);
 				 startActivity(i);
 				 finish();
     		}
@@ -109,12 +99,12 @@ public class CourseListActivity extends BaseActivity {
                 	}        	
                 	@Override
                 	protected SoapObject doInBackground(Void... params) {
-                		final LearnRoom item = (LearnRoom) fp.getItemAtPosition(position);
+                		final Course item = (Course) fp.getItemAtPosition(position);
                         courseId = item.getId();
                         courseName=item.getTitle();
                         SoapObject obj=null;
             			try {
-            				obj = getAppService().getDocumentsOverview(courseId);
+            				obj = getAppService().l2pService_listOfFilesofCourse(courseId);
             			} catch (AppException e) {
             				// TODO handle error here
             				e.printStackTrace();
@@ -161,13 +151,13 @@ public class CourseListActivity extends BaseActivity {
         });
     }
     
-    private class RoomArrayAdapter extends ArrayAdapter<LearnRoom> 
+    private class RoomArrayAdapter extends ArrayAdapter<Course> 
     {
 		//private static final String tag = "L2pRoomArrayAdapter";
 		private Context context;
-		private List<LearnRoom> objects;
+		private List<Course> objects;
 		
-		public RoomArrayAdapter(Context context, int textViewResourceId, List<LearnRoom> objects) {
+		public RoomArrayAdapter(Context context, int textViewResourceId, List<Course> objects) {
 			super(context, textViewResourceId, objects);
 			this.context = context;
 			this.objects = objects;
@@ -177,7 +167,7 @@ public class CourseListActivity extends BaseActivity {
 			return this.objects.size();
 		}
 
-		public LearnRoom getItem(int index) {
+		public Course getItem(int index) {
 			return this.objects.get(index);
 		}
 
@@ -191,7 +181,7 @@ public class CourseListActivity extends BaseActivity {
 				//Log.d(tag, "Successfully completed XML Row Inflation!");
 			}
 			TextView tw1 = (TextView)row.findViewById(R.id.courseItemTextView);
-			String str = ((LearnRoom)objects.get(position)).getTitle();
+			String str = ((Course)objects.get(position)).getTitle();
 			tw1.setText(str);
 			return row;
 		}

@@ -192,46 +192,7 @@ public class BaseActivity extends RoboActivity {
     
     private void downloadSampleFile() {
     	
-    	AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
-			ProgressDialog pd;
-			@Override
-			protected void onPreExecute() {
-				super.onPreExecute();
-				pd = ProgressDialog.show(BaseActivity.this, "Please Wait", "Getting sample file");
-			}
-			
-			@Override
-			protected SoapObject doInBackground(Void... params) {
-				SoapObject obj=null;
-					try {
-						obj = getAppService().l2pService_downloadFile("13ss-23347", "2");
-						String fileName = obj.getPropertyAsString("filename");
-						String data = obj.getPropertyAsString("filedata");
-						byte[] btDataFile=android.util.Base64.decode(data, android.util.Base64.DEFAULT);
-						File file = new File("/sdcard/l2p_to_temp/"+fileName);
-						FileOutputStream fos = null;
-			            fos = new FileOutputStream(file);
-			            fos.write(btDataFile);
-			            fos.close();
-
-					} catch (AppException e) {
-						// TODO handle error, top level
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				return obj;
-			}
-			
-			
-			@Override
-			protected void onPostExecute(SoapObject result) {
-				super.onPostExecute(result);
-				pd.dismiss();
-			}
-		};
-		task.execute();
+    	getAppService().requestDownloadRequest("13ws-40107", "2");
     	
     }
 	

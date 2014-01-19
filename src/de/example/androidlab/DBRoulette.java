@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.ksoap2.serialization.SoapObject;
@@ -387,7 +388,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 	{
 
 		
-		AsyncTask<Void, Void, SoapObject> task = new AsyncTask<Void, Void, SoapObject>(){
+		AsyncTask<Void, Void, List<Course>> task = new AsyncTask<Void, Void, List<Course>>(){
 			ProgressDialog pd;
 			@Override
 			protected void onPreExecute() {
@@ -396,8 +397,8 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			}
 			
 			@Override
-			protected SoapObject doInBackground(Void... params) {
-				SoapObject obj=null;
+			protected List<Course> doInBackground(Void... params) {
+				List<Course> obj=null;
 					try {
 						obj = getAppService().l2pService_allCourses();
 					} catch (AppException e) {
@@ -409,23 +410,13 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			
 			
 			@Override
-			protected void onPostExecute(SoapObject result) {
+			protected void onPostExecute(List<Course> result) {
 				super.onPostExecute(result);
 				pd.dismiss();
-				ArrayList<Course> rooms=new ArrayList<Course>();
-				
-				int count=result.getPropertyCount();
-				for(int i=0;i<count;i++)
-				{
-					SoapObject first =(SoapObject)result.getProperty(i);
-					String t=first.getPropertyAsString("Title");
-					String id=first.getPropertyAsString("ID");
-					Course lr=new Course(t,id);	
-					rooms.add(lr);
-				}
+			
 				
 				Bundle b = new Bundle();
-				b.putParcelableArrayList("rooms", rooms);
+				b.putParcelableArrayList("rooms", (ArrayList<Course>) result);
 				Intent i = new Intent(DBRoulette.this,CourseListActivity.class);
 				i.putExtras(b);
 				if(num==1)

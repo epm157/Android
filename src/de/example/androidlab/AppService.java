@@ -1,11 +1,15 @@
 package de.example.androidlab;
 
+//TODO search for all classes listed in documentation to replace them with Robo?? version
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,15 +19,14 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.json.JSONObject;
 import org.ksoap2.serialization.SoapObject;
 
 import roboguice.service.RoboService;
 import roboguice.util.Ln;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Environment;
 import android.os.IBinder;
+import android.text.format.DateFormat;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.DropboxAPI.UploadRequest;
@@ -46,16 +49,30 @@ public class AppService extends RoboService {
 	SharedPreferences pref;
 
 	ScheduledThreadPoolExecutor scheduledExecutor;
+	private static final int WATCHED_COURSES_LOOKUP_DELAY = 15;
+	private boolean stillWatching;
+
 	ThreadPoolExecutor downloadereExecutor;
 	ThreadPoolExecutor dropboxExecutor;
 
-	
-	Map<String,String> courseMap;
+	Map<String, String> courseMap;
 	Set<String> watchedCourses;
 
-	public void stopMe() {
-		stopSelf();
+	public void setStillWatching(boolean b) {
+		stillWatching = b;
+	}
+
+	public void shutDownExecutors() {
+		Ln.v("Shutting Down Executors");
 		scheduledExecutor.shutdown();
+		downloadereExecutor.shutdown();
+		dropboxExecutor.shutdown();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		shutDownExecutors();
 	}
 
 	// called once during the service life cycle only when it is created.
@@ -72,31 +89,29 @@ public class AppService extends RoboService {
 		if (watchedCourses == null)
 			watchedCourses = new HashSet<String>();
 
+		stillWatching = true;
 		scheduledExecutor.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
 
-				try {
-					Ln.v("Getting List of courses for watched courses");
+				if (!stillWatching)
+					return;
 
-					for (String courseId : watchedCourses) {
-						SoapObject courseList = srv.getDocumentsOverview(
-								getToken(), courseId);
-						Ln.v("SOAP object of courses of %s:", courseId);
-						Ln.v(courseList.toString());
+				Ln.v("Getting List of Material for watched courses");
+
+				for (String courseId : watchedCourses) {
+					List<MaterialItem> materialsOfThisCourse = l2pService_listOfFilesofCourse(courseId);
+
+					Ln.v("Looking into course with id: %s", courseId);
+					for (MaterialItem currentItem : materialsOfThisCourse) {
+						requestFileDownload(courseId, currentItem.getId(),
+								currentItem.getLastUpdated());
 					}
-
-				} catch (AppException e) {
-					Ln.e(e,
-							"Exception happended while updating course list of watched courses");
 				}
-
 			}
-		}, 0, 4, TimeUnit.SECONDS);
+		}, 0, WATCHED_COURSES_LOOKUP_DELAY, TimeUnit.SECONDS);
 
-		// TODO search for all classes listed in documentation to replace them
-		// with Robo?? version
 	}
 
 	public void setWatchedCourses(Set<String> newWatchList) {
@@ -129,12 +144,6 @@ public class AppService extends RoboService {
 		return new AppServiceBinder(AppService.this);
 	}
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		scheduledExecutor.shutdown();
-	}
-
 	public boolean isDeviceRegistered() {
 		return auth.isDeviceRegistered();
 	}
@@ -164,46 +173,99 @@ public class AppService extends RoboService {
 		return toRet;
 	}
 
-	public SoapObject l2pService_listOfFilesofCourse(String courseId)
-			throws AppException {
-		return srv.getDocumentsOverview(getToken(), courseId);
-	}
-	
-	
-	public String getNameForCourseById(String id) {
-		if(courseMap == null) {
-			try {
-				l2pService_allCourses();
-			} catch (AppException e) {
-				Ln.e(e,"Exception while calling list of courses");
-			}
+	public List<MaterialItem> l2pService_listOfFilesofCourse(String courseId) {
+
+		SoapObject result = null;
+		try {
+			result = srv.getDocumentsOverview(getToken(), courseId);
+		} catch (AppException e) {
+			Ln.e(e, "Exception while getting list of files for courseId: %s",
+					courseId);
 		}
-		return  courseMap.get(id); 
+
+		ArrayList<MaterialItem> materials = new ArrayList<MaterialItem>();
+
+		int count = result.getPropertyCount();
+		for (int i = 0; i < count; i++) {
+			SoapObject first = (SoapObject) result.getProperty(i);
+			String idd = first.getPropertyAsString("Id");
+			String name = first.getPropertyAsString("Name");
+			String url = first.getPropertyAsString("Url");
+			String ft = first.getPropertyAsString("FileType");
+			String lu = first.getPropertyAsString("LastUpdated").toString(); // TODO
+																				// because
+																				// we
+																				// have
+																				// lastupdate,
+																				// we
+																				// should
+																				// save
+																				// and
+																				// use
+																				// it
+																				// for
+																				// later
+																				// checks
+			String state = "0";
+			MaterialItem lr = new MaterialItem(idd, name, url, ft, lu, state);
+			materials.add(lr);
+		}
+
+		return materials;
+
 	}
 
-	public List<Course> l2pService_allCourses() throws AppException {
-		// TODO save file id and courses to a map for lookup, also for method
-		// getCourseNameforId()
+	public String getNameForCourseById(String id) {
+		if (courseMap == null)
+			l2pService_allCourses();
+		return courseMap.get(id);
+	}
+
+	public List<Course> l2pService_allCourses() {
+
 		// TODO : save via JSONObject ot preferences (shared)
-		courseMap = new HashMap<String, String>();
-		
+
 		ArrayList<Course> courses = new ArrayList<Course>();
-		SoapObject result = srv.getCourseList(getToken());
+		SoapObject result = null;
+		try {
+			result = srv.getCourseList(getToken());
+		} catch (AppException e) {
+			Ln.e(e, "Exception while getting list of all courses");
+		}
 		int count = result.getPropertyCount();
-		
+
 		for (int i = 0; i < count; i++) {
 			SoapObject current = (SoapObject) result.getProperty(i);
 			String title = current.getPropertyAsString("Title");
 			String id = current.getPropertyAsString("ID");
 			Course course = new Course(title, id);
-			courseMap.put(id, title);
 			courses.add(course);
 		}
+
+		// if no exception happened save new list of courses to map :
+		courseMap = new HashMap<String, String>();
+		for (Course c : courses)
+			courseMap.put(c.getId(), c.getTitle());
+
 		return courses;
 	}
 
-	public void requestDownloadRequest(final String courseId,
-			final String fileId) {
+	public void requestFileDownload(final String courseId, final String fileId,
+			final String lastUpdated) {
+
+		Ln.v("requestFileDownload(%s,%s,%s)", courseId, fileId, lastUpdated);
+
+		Date newDate = stringToDate(lastUpdated);
+		String fileKey = courseId + fileId;
+		String previous = pref.getString(fileKey, null);
+		if (previous != null && stringToDate(previous).equals(newDate)) {
+			Ln.v("[courseId:%s and fileId:%s] no need to download again",
+					courseId, fileId);
+			return;
+		}
+
+		Ln.v("adding to downloader [courseId:%s and fileId:%s]",
+				courseId, fileId);
 		downloadereExecutor.execute(new Runnable() {
 
 			@Override
@@ -219,8 +281,6 @@ public class AppService extends RoboService {
 					String data = obj.getPropertyAsString("filedata");
 					byte[] btDataFile = android.util.Base64.decode(data,
 							android.util.Base64.DEFAULT);
-					// String dir_path = String.format("%s/l2p_to_temp/%s",
-					// Environment.getExternalStorageDirectory().getPath());
 					String dir_path = String.format("/sdcard/l2p_to_temp/%s",
 							name);
 					File applicationDirectory = new File(dir_path);
@@ -235,24 +295,38 @@ public class AppService extends RoboService {
 					fos.write(btDataFile);
 					fos.close();
 
-					
-					requestUploadToDrobbox(name, fileName); // TODO : upload by dropbox execurotor
- 					
+					requestUploadToDrobbox(name, fileName, lastUpdated,
+							courseId, fileId);
 
 				} catch (AppException e) {
-					Ln.e(e,"App exception while downloading the file");
+					Ln.e(e, "App exception while downloading the file");
 				} catch (IOException e) {
-					Ln.e(e,"IOException while downloading the file");
-					e.printStackTrace();
+					Ln.e(e, "IOException while downloading the file");
 				}
 
 			}
 		});
 	}
 
-	public void requestUploadToDrobbox(String courseName, String fileName) {
+	private Date stringToDate(String str) {
 
-		Ln.v("requestUpload(%s,%s) was called", courseName, fileName);
+		try {
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			return format.parse(str);
+
+		} catch (ParseException e) {
+			Ln.e(e, "Exception Parsing date: <%s>", str);
+			return null;
+		}
+	}
+
+	public void requestUploadToDrobbox(final String courseName,
+			final String fileName, String lastUpdate, String courseId,
+			String fileId) {
+		// TODO : upload by dropbox execurotor
+		Ln.v("requestUploadToDrobbox(%s,%s,%s) ", courseName, fileName,
+				lastUpdate);
 
 		try {
 
@@ -300,10 +374,19 @@ public class AppService extends RoboService {
 
 			mRequest.upload();
 
+			// if no exception occured while uploading to dropbox, then put file
+			// key in sharedPreferences
+			String fileKey = courseId + fileId;
+			pref.edit().putString(fileKey, lastUpdate).commit();
+
 		} catch (IOException e) {
-			Ln.e(e, "Error while uploading to dropbox");
+			Ln.e(e,
+					"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
+					courseName, fileName);
 		} catch (DropboxException e) {
-			Ln.e(e, "Error while uploading to dropbox");
+			Ln.e(e,
+					"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
+					courseName, fileName);
 		}
 
 	}

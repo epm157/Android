@@ -398,14 +398,7 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 			
 			@Override
 			protected List<Course> doInBackground(Void... params) {
-				List<Course> obj=null;
-					try {
-						obj = getAppService().l2pService_allCourses();
-					} catch (AppException e) {
-						// TODO handle error, top level
-						e.printStackTrace();
-					}
-				return obj;
+				return getAppService().l2pService_allCourses();
 			}
 			
 			

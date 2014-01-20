@@ -2,6 +2,8 @@ package de.example.androidlab;
 
 //TODO search for all classes listed in documentation to replace them with Robo?? version
 
+//TODO use injection where loadbyid is used
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +25,9 @@ import org.ksoap2.serialization.SoapObject;
 
 import roboguice.service.RoboService;
 import roboguice.util.Ln;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
@@ -47,6 +52,9 @@ public class AppService extends RoboService {
 	L2PServices srv;
 	@Inject
 	SharedPreferences pref;
+	
+	@Inject
+	NotificationManager notificationManager;
 
 	ScheduledThreadPoolExecutor scheduledExecutor;
 	private static final int WATCHED_COURSES_LOOKUP_DELAY = 15;
@@ -128,6 +136,7 @@ public class AppService extends RoboService {
 	// But as long as we want to be able to run in background even when all
 	// activities finish
 	// then this method should be implemented
+	
 	// TODO Our Service should also make notifications if L2P or Dropbox are
 	// disconnected.
 
@@ -151,6 +160,21 @@ public class AppService extends RoboService {
 	public void ping() {
 		Ln.v("AppService.ping()");
 	}
+	
+	public void showNotification(String title, String text, String info, String fileId) {
+		
+		PendingIntent contentIntent = PendingIntent.getActivity( getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		Notification notification = new Notification.Builder(this)
+		.setContentTitle(title)
+		.setContentInfo(info)
+		.setContentText(text)
+		.setSmallIcon(R.drawable.ic_launcher)
+		.setContentIntent(contentIntent).build();
+		
+		notificationManager.notify(Integer.parseInt(fileId), notification);
+	}
+	
 
 	public String getToken() throws AppException {
 		return auth.getAccessToken();
@@ -316,7 +340,7 @@ public class AppService extends RoboService {
 
 	public void requestUploadToDrobbox(final String courseName,
 			final String fileName, final String lastUpdate, final String courseId,
-			String fileId) {
+			final String fileId) {
 		Ln.v("requestUploadToDrobbox(%s,%s,%s) ", courseName, fileName,
 				lastUpdate);
 
@@ -373,6 +397,9 @@ public class AppService extends RoboService {
 
 					fis.close();
 					f.delete(); //TODO : check if file is deleted from andriod after having it uploaded to dropbox
+					
+					showNotification(fileName, courseName, "✓ Now in Dropbox",fileId);
+					//TODO : What should be done when click on notification?
 
 				} catch (IOException e) {
 					Ln.e(e,

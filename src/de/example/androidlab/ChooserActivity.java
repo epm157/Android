@@ -42,7 +42,7 @@ public class ChooserActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chooser);
 		
-		updateList();
+		//updateList();
 		
 		mChooser = new DbxChooser(APP_KEY);
 		

@@ -210,9 +210,9 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 		dropbox2l2p = (Button) findViewById(R.id.dropbox2ltp);
 		dropbox2l2p.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// This logs you out if you're logged in, or vice versa
 				 Intent i = new Intent(getBaseContext(),ChooserActivity.class);
 				 startActivity(i);
+				 //finish();
 			}
 		});
 

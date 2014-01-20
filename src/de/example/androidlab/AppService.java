@@ -192,20 +192,7 @@ public class AppService extends RoboService {
 			String name = first.getPropertyAsString("Name");
 			String url = first.getPropertyAsString("Url");
 			String ft = first.getPropertyAsString("FileType");
-			String lu = first.getPropertyAsString("LastUpdated").toString(); // TODO
-																				// because
-																				// we
-																				// have
-																				// lastupdate,
-																				// we
-																				// should
-																				// save
-																				// and
-																				// use
-																				// it
-																				// for
-																				// later
-																				// checks
+			String lu = first.getPropertyAsString("LastUpdated").toString();
 			String state = "0";
 			MaterialItem lr = new MaterialItem(idd, name, url, ft, lu, state);
 			materials.add(lr);
@@ -264,8 +251,8 @@ public class AppService extends RoboService {
 			return;
 		}
 
-		Ln.v("adding to downloader [courseId:%s and fileId:%s]",
-				courseId, fileId);
+		Ln.v("adding to downloader [courseId:%s and fileId:%s]", courseId,
+				fileId);
 		downloadereExecutor.execute(new Runnable() {
 
 			@Override
@@ -295,6 +282,11 @@ public class AppService extends RoboService {
 					fos.write(btDataFile);
 					fos.close();
 
+					// if no exception occured while downloading then put file
+					// key in sharedPreferences
+					String fileKey = courseId + fileId;
+					pref.edit().putString(fileKey, lastUpdated).commit();
+
 					requestUploadToDrobbox(name, fileName, lastUpdated,
 							courseId, fileId);
 
@@ -312,7 +304,8 @@ public class AppService extends RoboService {
 
 		try {
 
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			SimpleDateFormat format = new SimpleDateFormat(
+					"yyyy-MM-dd'T'HH:mm:ss");
 			return format.parse(str);
 
 		} catch (ParseException e) {
@@ -322,73 +315,77 @@ public class AppService extends RoboService {
 	}
 
 	public void requestUploadToDrobbox(final String courseName,
-			final String fileName, String lastUpdate, String courseId,
+			final String fileName, final String lastUpdate, final String courseId,
 			String fileId) {
-		// TODO : upload by dropbox execurotor
 		Ln.v("requestUploadToDrobbox(%s,%s,%s) ", courseName, fileName,
 				lastUpdate);
 
-		try {
 
-			File f = new File(String.format("/sdcard/l2p_to_temp/%s/%s",
-					courseName, fileName));
-			FileInputStream fis = new FileInputStream(f);
+		dropboxExecutor.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
 
-			final String APP_KEY = "u7wjc7dtt7nzvmm";
-			final String APP_SECRET = "1shsa0ki6188si9";
-			final AccessType ACCESS_TYPE = AccessType.APP_FOLDER;
-			final String ACCOUNT_PREFS_NAME = "prefs";
-			final String ACCESS_KEY_NAME = "ACCESS_KEY";
-			final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-			AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
+					File f = new File(String.format("/sdcard/l2p_to_temp/%s/%s",
+							courseName, fileName));
+					FileInputStream fis = new FileInputStream(f);
 
-			String[] stored = null;
+					final String APP_KEY = "u7wjc7dtt7nzvmm";
+					final String APP_SECRET = "1shsa0ki6188si9";
+					final AccessType ACCESS_TYPE = AccessType.APP_FOLDER;
+					final String ACCOUNT_PREFS_NAME = "prefs";
+					final String ACCESS_KEY_NAME = "ACCESS_KEY";
+					final String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+					AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
 
-			SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME,
-					0);
-			String key = prefs.getString(ACCESS_KEY_NAME, null);
-			String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-			if (key != null && secret != null) {
-				stored = new String[2];
-				stored[0] = key;
-				stored[1] = secret;
+					String[] stored = null;
+
+					SharedPreferences prefs = getSharedPreferences(ACCOUNT_PREFS_NAME,
+							0);
+					String key = prefs.getString(ACCESS_KEY_NAME, null);
+					String secret = prefs.getString(ACCESS_SECRET_NAME, null);
+					if (key != null && secret != null) {
+						stored = new String[2];
+						stored[0] = key;
+						stored[1] = secret;
+					}
+
+					AndroidAuthSession session;
+
+					if (stored != null) {
+						AccessTokenPair accessToken = new AccessTokenPair(stored[0],
+								stored[1]);
+						session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE,
+								accessToken);
+					} else {
+						session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE);
+					}
+
+					DropboxAPI<AndroidAuthSession> mApi;
+
+					mApi = new DropboxAPI<AndroidAuthSession>(session);
+					UploadRequest mRequest = mApi.putFileOverwriteRequest(
+							String.format("%s/%s", courseName, fileName), fis,
+							f.length(), null);
+
+					mRequest.upload();
+
+					fis.close();
+					f.delete(); //TODO : check if file is deleted from andriod after having it uploaded to dropbox
+
+				} catch (IOException e) {
+					Ln.e(e,
+							"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
+							courseName, fileName);
+				} catch (DropboxException e) {
+					Ln.e(e,
+							"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
+							courseName, fileName);
+				}
+				
 			}
-
-			AndroidAuthSession session;
-
-			if (stored != null) {
-				AccessTokenPair accessToken = new AccessTokenPair(stored[0],
-						stored[1]);
-				session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE,
-						accessToken);
-			} else {
-				session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE);
-			}
-
-			DropboxAPI<AndroidAuthSession> mApi;
-
-			mApi = new DropboxAPI<AndroidAuthSession>(session);
-			UploadRequest mRequest = mApi.putFileOverwriteRequest(
-					String.format("%s/%s", courseName, fileName), fis,
-					f.length(), null);
-
-			mRequest.upload();
-
-			// if no exception occured while uploading to dropbox, then put file
-			// key in sharedPreferences
-			String fileKey = courseId + fileId;
-			pref.edit().putString(fileKey, lastUpdate).commit();
-
-		} catch (IOException e) {
-			Ln.e(e,
-					"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
-					courseName, fileName);
-		} catch (DropboxException e) {
-			Ln.e(e,
-					"Error while uploading to dropbox the file with courseName:%s and fileName:%s",
-					courseName, fileName);
-		}
-
+		});
+		
 	}
-
 }

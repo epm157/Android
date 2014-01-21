@@ -8,8 +8,10 @@ import java.util.Set;
 import roboguice.util.Ln;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,9 @@ public class WatchCoursesSelectionActivity extends BaseActivity {
 
 	RoomArrayAdapter adapter;
 	List<Course> l2pRoomslist;
+	
+	Set<String> watchedCoursesIds;
+	
 	//@InjectView(R.id.watched_course_selection_list)
 	private ListView listView;
 	
@@ -36,14 +41,24 @@ public class WatchCoursesSelectionActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		
+		Intent x = this.getIntent();
+        Bundle b=this.getIntent().getExtras();
+		ArrayList<Parcelable> rooms=b.getParcelableArrayList("rooms");
+		l2pRoomslist=new ArrayList<Course>();
+    	for(int i=0;i<rooms.size();i++)
+    	{
+    		Course lm=(Course)rooms.get(i);
+    		l2pRoomslist.add(lm);
+    	}
+		
+		
+		
 		setContentView(R.layout.watched_course_selection);
 		listView = (ListView) findViewById(R.id.watched_course_selection_list);
 		submitButton = (Button) findViewById(R.id.submit_watchList);
 		//List<Course> tempAll = new ArrayList<Course>();
-		l2pRoomslist=new ArrayList<Course>();
-		l2pRoomslist.add(new Course("titl1","id1"));
-		l2pRoomslist.add(new Course("titl2","id2"));
-		l2pRoomslist.add(new Course("titl3","id3"));
 		
 		
 		

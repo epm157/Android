@@ -247,10 +247,33 @@ public class DBRoulette extends BaseActivity implements API_Listener {
 		autoSync.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				// This logs you out if you're logged in, or vice versa
-				Intent i = new Intent(getBaseContext(),
-						WatchCoursesSelectionActivity.class);
-				startActivity(i);
-
+				
+				
+				AppAsyncTask<Void, List<Course>> t = new AppAsyncTask<Void, List<Course>>(DBRoulette.this,"Please Wait",
+						"Getting list of Courses ") {
+					
+					@Override
+					protected List<Course> doInBackground(Void... arg0) {
+						return getAppService().l2pService_allCourses();
+					}
+					
+					@Override
+							protected void onPostExecute(List<Course> result) {
+								super.onPostExecute(result);
+								
+								
+								Bundle b = new Bundle();
+								b.putParcelableArrayList("rooms", (ArrayList<Course>) result);
+								Intent i = new Intent(DBRoulette.this,WatchCoursesSelectionActivity.class);
+								i.putExtras(b);
+								
+								
+								startActivity(i);
+							}
+				};
+				
+				
+				t.execute();
 			}
 		});
 

@@ -39,6 +39,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                android:layout_marginTop="10dp"
+               android:focusable="false"
                 android:textColorHint="@android:color/black" />
             
             <ImageView
